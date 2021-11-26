@@ -10,7 +10,7 @@ import org.apache.lucene.search.TopDocs;
 
 public class LuceneTester {
     String indexDir = "D:\\Project1_Passos_Braouni\\Index"; // REDO
-    String dataDir = "D:\\Project1_Passos_Braouni\\Data";
+    String dataDir = "D:\\Project1_Passos_Braouni\\Reuters";
     Indexer indexer;
     Searcher searcher;
     public static void main(String[] args) {
@@ -18,7 +18,7 @@ public class LuceneTester {
         try {
             tester = new LuceneTester();
             tester.createIndex();
-            tester.search("Mohan");
+            tester.search("periods");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
