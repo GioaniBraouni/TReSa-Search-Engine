@@ -9,7 +9,7 @@ import org.apache.lucene.search.TopDocs;
 
 
 public class LuceneTester {
-    String indexDir = "D:\\Project1_Passos_Braouni\\Index";
+    String indexDir = "D:\\Project1_Passos_Braouni\\Index"; // REDO
     String dataDir = "D:\\Project1_Passos_Braouni\\Data";
     Indexer indexer;
     Searcher searcher;
