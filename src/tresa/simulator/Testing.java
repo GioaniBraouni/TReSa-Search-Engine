@@ -10,6 +10,8 @@ import org.tartarus.snowball.ext.EnglishStemmer;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Testing {
 
@@ -29,6 +31,9 @@ public class Testing {
         StandardAnalyzer analyzer = new StandardAnalyzer(); // TODO Me auto kati prepei na paixtei pou den exw katalavei akoma
         String test = "testing";
         Tokenizer token = new StandardTokenizer();
+
+        Pattern pattern = Pattern.compile("(?<=\\<title>)(.*?)(?=\\</title>)|(?<=\\<places>)(.*?)(?=\\</places>)|(?<=\\<people>)(.*?)(?=\\</people>)");
+        Matcher matcher;
         //stemmer.setCurrent(test);
         //stemmer.stem();
         //String res = stemmer.getCurrent();
@@ -43,15 +48,13 @@ public class Testing {
         }
         while (sc2.hasNextLine()) {
             Scanner s2 = new Scanner(sc2.nextLine());
+
             while (s2.hasNext()) {
 
                 String s = s2.next();
-
-
-
                 stemmer.setCurrent(s);
                 stemmer.stem();
-                String st = stemmer.getCurrent();
+                String st = stemmer.getCurrent().toLowerCase(Locale.ROOT);
                 System.out.println(st);
             }
 
