@@ -13,6 +13,7 @@ public class LuceneTester {
     String dataDir = "Reuters";
     Indexer indexer;
     Searcher searcher;
+    CustomIndex cIndex;
     public static void main(String[] args) {
         LuceneTester tester;
         try {
@@ -26,12 +27,12 @@ public class LuceneTester {
         }
     }
     private void createIndex() throws IOException {
-        indexer = new Indexer(indexDir);
+        cIndex = new CustomIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
-        numIndexed = indexer.createIndex(dataDir, new TextFileFilter());
+        numIndexed = cIndex.createIndex(dataDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        indexer.close();
+        cIndex.close();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
     }

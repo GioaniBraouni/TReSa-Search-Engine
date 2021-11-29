@@ -9,13 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.document.*;
+import org.apache.lucene.index.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -43,10 +38,19 @@ public class Indexer {
         writer.close();
     }
     private Document getDocument(File file) throws IOException {
+
+
+
         Document document = new Document();
         //index file contents
         BufferedReader br = new BufferedReader(new FileReader(file));
+
         String currentLine = br.readLine().toString(); // If line contains <TITLE> give more weight. (IDEA)
+
+        System.out.println(currentLine);
+
+        Field title = new Field(LuceneConstants.TITLE,currentLine,TextField.TYPE_STORED);
+
         Field contentField = new Field(LuceneConstants.CONTENTS, currentLine,
                 TextField.TYPE_STORED);
         //index file name
@@ -55,6 +59,8 @@ public class Indexer {
         //index file path
         Field filePathField = new Field(LuceneConstants.FILE_PATH,
                 file.getCanonicalPath(), StringField.TYPE_STORED);
+
+        document.add(title);
         document.add(contentField);
         document.add(fileNameField);
         document.add(filePathField);
