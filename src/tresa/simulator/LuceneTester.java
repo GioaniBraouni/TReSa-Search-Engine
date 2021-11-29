@@ -6,11 +6,11 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
-
+// Added 8.0.0
 
 public class LuceneTester {
-    String indexDir = "D:\\Project1_Passos_Braouni\\Index"; // REDO
-    String dataDir = "D:\\Project1_Passos_Braouni\\Reuters";
+    String indexDir = "Index"; // REDO
+    String dataDir = "Data";
     Indexer indexer;
     Searcher searcher;
     public static void main(String[] args) {

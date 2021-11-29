@@ -48,7 +48,6 @@ public class Testing {
         }
         while (sc2.hasNextLine()) {
             Scanner s2 = new Scanner(sc2.nextLine());
-
             while (s2.hasNext()) {
 
                 String s = s2.next();
