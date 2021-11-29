@@ -10,7 +10,7 @@ import org.apache.lucene.search.TopDocs;
 
 public class LuceneTester {
     String indexDir = "Index"; // REDO
-    String dataDir = "Data";
+    String dataDir = "Reuters";
     Indexer indexer;
     Searcher searcher;
     public static void main(String[] args) {
