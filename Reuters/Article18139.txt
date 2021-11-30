@@ -1,7 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>XIOX <XIOX.O> REINCORPORATES IN DELAWARE</TITLE>
-<BODY>Xiox Corp said it has changed
-its state of incorporation to Delaware from California.
- Reuter
-</BODY>

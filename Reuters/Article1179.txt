@@ -1,5 +1,0 @@
-<PLACES>italy</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE> Italian government has resigned, officials announced
-</TITLE>
-<BODY> </BODY>

@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>PERFECTDATA <PERF> IN JOINT LICENSING PACT</TITLE>
-<BODY>PerfectData Corp said it
-agreed to license certain disk cleaning related patents to the
-<Texwipe Co>.
- Reuter
-</BODY>

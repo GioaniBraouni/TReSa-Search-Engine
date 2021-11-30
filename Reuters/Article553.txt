@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>UNISYS CORP <UIS> SETS QUARTERLY</TITLE>
-<BODY>Qtly div 65 cts vs 65 cts prior
-    Pay May Seven
-    Record April Seven
- Reuter
-</BODY>

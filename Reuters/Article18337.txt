@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>FEDERAL SIGNAL CORP <FSS> SETS REGULAR DIVIDEND</TITLE>
-<BODY>Qtly div 20 cts vs 20 cts prior
-    Pay September three
-    Record August 17
- Reuter
-</BODY>

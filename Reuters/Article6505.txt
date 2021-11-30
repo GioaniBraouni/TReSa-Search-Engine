@@ -1,9 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>FAIRCHILD INDUSTRIES <FEN> SETS REGULAR PAYOUT</TITLE>
-<BODY>Qtrly div five cts vs five cts
-    Pay Apirl 10
-    Record March 30
-    
- Reuter
-</BODY>

@@ -1,4 +1,0 @@
-<PLACES>yugoslavia</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE> </TITLE>
-<BODY> </BODY>

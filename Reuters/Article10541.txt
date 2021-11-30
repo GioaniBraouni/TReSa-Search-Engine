@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>CONAGRA INC <CAG> REGULAR DIVIDEND SET</TITLE>
-<BODY>Qtly div 14-1/2 cts vs 14-1/2 cts prior
-    Pay June One
-    Record April 24
- Reuter
-</BODY>

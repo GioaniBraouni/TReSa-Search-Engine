@@ -1,4 +1,0 @@
-<PLACES>zimbabwe</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE> </TITLE>
-<BODY> </BODY>

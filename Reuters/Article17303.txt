@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>FGIC CORP <FGC> QTLY DIVIDEND</TITLE>
-<BODY>Qtly div one cts vs one cts prior
-    Payable July 1
-    Record June 10
- Reuter
-</BODY>

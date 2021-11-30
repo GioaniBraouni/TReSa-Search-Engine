@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>NBD BANCORP <NBD> REGULAR DIVIDEND SET</TITLE>
-<BODY>Qtly div 30 cts vs 30 cts previously
-    Pay May 11
-    Record April Nine
- Reuter
-</BODY>

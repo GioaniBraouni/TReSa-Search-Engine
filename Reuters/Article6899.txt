@@ -1,9 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>ONCOGENE <ONCS> PRESIDENT RESIGNS</TITLE>
-<BODY>Oncogene Science INc said Robert
-Ivy is resigning as president, chief executive officer and
-director, effective April 12
-    No immediate successor was named.
- Reuter
-</BODY>

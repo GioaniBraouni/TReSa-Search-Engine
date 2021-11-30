@@ -1,9 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>AMERON INC <AMN> QTLY DIVIDEND</TITLE>
-<BODY>Shr 24 cts vs 24 cts prior qtr
-    Pay May 15
-    Record April 24
-            
- Reuter
-</BODY>

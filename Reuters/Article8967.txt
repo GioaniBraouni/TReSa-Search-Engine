@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>SIGNET BANKING CORP REGULAR DIVIDEND</TITLE>
-<BODY>Qtly div 31 cts vs 31 cts prior
-    Payable APril 22
-    Record April three
- Reuter
-</BODY>

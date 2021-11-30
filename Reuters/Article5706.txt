@@ -1,9 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>TRANSAMERICA INCOME <TAI> MONTHLY DIVIDEND</TITLE>
-<BODY>Shr 19 cts vs 19 cts prior period
-    Pay April 15
-    Record March 31
-    Note: Full name Transamerica Income Shares Inc.
- Reuter
-</BODY>

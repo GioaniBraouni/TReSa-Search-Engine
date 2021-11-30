@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>STALEY CONTINENTAL <STA> REGULAR DIVIDEND SET</TITLE>
-<BODY>Qtly div 20 cts vs 20 cts previously
-    Pay June Eight
-    Record May 22
- Reuter
-</BODY>

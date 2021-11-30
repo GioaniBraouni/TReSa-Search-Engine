@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>SHAWMUT <SHAS.O> CHANGES NAME OF SUBSIDIARY</TITLE>
-<BODY>Shawmut Corp said it changed the name of
-its subsidiary, First Gibraltar Mortgage Corp, to Shawmut First
-Mortgage Corp.
- Reuter
-</BODY>

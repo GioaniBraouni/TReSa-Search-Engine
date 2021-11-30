@@ -1,6 +1,0 @@
-<PLACES>japan</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>Japan May unemployment record 3.2 pct (3.0 pct in April)
-- official
-</TITLE>
-<BODY> </BODY>

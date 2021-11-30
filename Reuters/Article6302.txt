@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>PACIFIC STOCK EXCHANGE HIT BY COMPUTER FAILURE</TITLE>
-<BODY>The Pacific Stock Exchange said it was
-omitting today's closing report on the most active issues
-because of a computer malfunction at the exchange.
- Reuter
-</BODY>

@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>INSILCO CORP <INR> SETS PAYOUT</TITLE>
-<BODY>Qtly div 25 cts vs 25 cts prior
-    Pay Aug One
-    Record July 10
- Reuter
-</BODY>

@@ -1,7 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>CAPITAL CITIES/ABC <CCB> SETS PAYOUT</TITLE>
-<BODY>Qtrly div five cts vs five cts
-    Pay April 20
-    Record March 30
-</BODY>

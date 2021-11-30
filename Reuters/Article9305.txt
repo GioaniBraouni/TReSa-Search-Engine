@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>PIONEER-STANDARD ELECTRONICS INC <PIOS> PAYOUT</TITLE>
-<BODY>Qtly div three cts vs three cts prior
-    Pay May One
-    Record April Eight
- Reuter
-</BODY>

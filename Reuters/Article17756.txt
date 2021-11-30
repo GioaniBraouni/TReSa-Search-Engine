@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>NUCOR CORP <NUE> SETS PAYOUT</TITLE>
-<BODY>Qtly div nine cts vs nine cts prior
-    Pay Aug 11
-    Record June 30
- Reuter
-</BODY>

@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>MCA INC <MCA> SETS REGULAR QTRLY PAYOUT</TITLE>
-<BODY>Qtrly div 17 cts vs 17 cts prior
-    Pay April 13
-    Record March 25
- Reuter
-</BODY>

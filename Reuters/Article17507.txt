@@ -1,4 +1,0 @@
-<PLACES>ukusa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE> </TITLE>
-<BODY> </BODY>

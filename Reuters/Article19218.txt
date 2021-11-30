@@ -1,8 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>FIRESTONE TIRE AND RUBBER CO <FIR> RAISES PAYOUT</TITLE>
-<BODY>Qtly div 30 cts vs 25 cts
-    Pay Jan 19
-    Record Jan Four
- Reuter
-</BODY>

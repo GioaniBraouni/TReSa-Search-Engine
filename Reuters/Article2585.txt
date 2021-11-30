@@ -1,7 +1,0 @@
-<PLACES>usa</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE>POSTMASTERS <POST> LISTED ON NASDAQ</TITLE>
-<BODY>Postmasters Inc said its common
-stock has been listed on the NASDAQ system, effective today.
- Reuter
-</BODY>

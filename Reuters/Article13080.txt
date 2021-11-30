@@ -1,4 +1,0 @@
-<PLACES>canada</PLACES>
-<PEOPLE></PEOPLE>
-<TITLE> </TITLE>
-<BODY> </BODY>
