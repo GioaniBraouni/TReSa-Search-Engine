@@ -36,21 +36,9 @@ public class SecondIndex {
         if (!Files.exists(indexPath)) {
             Files.createDirectory(indexPath);
         }
-        //Path indexPath = Files.createTempDirectory(indexDirectoryPath);
+
         Directory indexDirectory = FSDirectory.open(indexPath);
-        //create the indexer
 
-
-
-//        final List<String> stopWords = List.of(
-//                "an","a","and","are","as","at","be","but","by","for","if","in","into","is","it","no","not","of","on","or","s","such","t","that","the","their","then","there","these","they","this","to","was","will","with","www"
-//        );
-//
-//        final CharArraySet stopSet = new CharArraySet(stopWords,true);
-//
-//        StopAnalyzer stopAnalyzer = new StopAnalyzer(stopSet);
-//
-//        StandardAnalyzer std = new StandardAnalyzer(stopSet);
 
         List<String> stopWords = List.of("places","people","title","body");
 
@@ -62,30 +50,25 @@ public class SecondIndex {
         stopSet.addAll(enStopSet);
 
         Map<String,Analyzer> analyzerPerField = new HashMap<>();
-        //analyzerPerField.put(LuceneConstants.BODY,new EnglishAnalyzer());
+
         analyzerPerField.put(LuceneConstants.TITLE,new StandardAnalyzer(stopSet));
         analyzerPerField.put(LuceneConstants.PLACES,new StandardAnalyzer(stopSet));
-        //analyzerPerField.put(LuceneConstants.PEOPLE,new EnglishAnalyzer());
+
 
         PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(stopSet),analyzerPerField);
-
-
-
-
-        //EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer(stopSet);
-
-
 
         IndexWriterConfig config = new IndexWriterConfig(wrapper); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
 
         writer = new IndexWriter(indexDirectory, config); // The IndexWriterConfig.OpenMode option on IndexWriterConfig.setOpenMode(OpenMode) determines whether a new index is created, or whether an existing index is opened.
     }
 
+
+
     public void close() throws CorruptIndexException, IOException {
         writer.close();
     }
 
-    private Document getDocument(File file) throws IOException {
+    protected Document getDocument(File file) throws IOException {
 
 
         Document document = new Document();
@@ -125,24 +108,40 @@ public class SecondIndex {
         Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
         document.add(fileNameField);
         document.add(filePathField);
-
-//        Field title = new Field(LuceneConstants.TITLE,currentLine,TextField.TYPE_STORED);
-//
-//        Field contentField = new Field(LuceneConstants.CONTENTS, currentLine,
-//                TextField.TYPE_STORED);
-//        //index file name
-//        Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(),
-//                StringField.TYPE_STORED);
-//        //index file path
-//        Field filePathField = new Field(LuceneConstants.FILE_PATH,
-//                file.getCanonicalPath(), StringField.TYPE_STORED);
-//
-//        document.add(title);
-//        document.add(contentField);
-//        document.add(fileNameField);
-//        document.add(filePathField);
         br.close();
         return document;
+    }
+    //DELE
+    private void deleteDoc(File file) throws IOException {
+        Document doc = getDocument(file);
+        Term fileTerm = new Term(LuceneConstants.FILE_NAME,doc.get(LuceneConstants.FILE_NAME));
+        Term contentTerm = new Term(LuceneConstants.CONTENTS,doc.get(LuceneConstants.CONTENTS));
+        Term pathTerm = new Term(LuceneConstants.FILE_PATH,doc.get(LuceneConstants.FILE_PATH));
+        Term titleTerm = new Term(LuceneConstants.TITLE,doc.get(LuceneConstants.TITLE));
+        Term placesTerm = new Term(LuceneConstants.PLACES,doc.get(LuceneConstants.PLACES));
+        Term peopleTerm = new Term(LuceneConstants.PEOPLE,doc.get(LuceneConstants.PEOPLE));
+
+        System.out.println(peopleTerm.toString());
+        System.out.println(contentTerm);
+
+        writer.deleteDocuments(fileTerm);
+        writer.deleteDocuments(contentTerm);
+        writer.deleteDocuments(pathTerm);
+        writer.deleteDocuments(titleTerm);
+        writer.deleteDocuments(placesTerm);
+        writer.deleteDocuments(peopleTerm);
+
+        //writer.commit();
+        writer.forceMergeDeletes();
+        writer.close();
+
+    }
+    //DELE
+    public void deletingFiles(String fileName) throws IOException {
+        File file = new File(fileName);
+        System.out.println("Deleting from Index file: " + file.getCanonicalPath());
+        deleteDoc(file);
+        close();
     }
 
     private void indexFile(File file) throws IOException {
@@ -165,6 +164,23 @@ public class SecondIndex {
                 indexFile(file);
             }
         }
+        return writer.numRamDocs();
+    }
+
+
+    public int createSingleIndex(String fileName, FileFilter filter) throws
+            IOException {
+        //get all files in the data directory
+        File files = new File(fileName);
+
+        if (!files.isHidden()
+                && files.exists()
+                && files.canRead()
+                && filter.accept(files)
+        ) {
+            indexFile(files);
+        }
+
         return writer.numRamDocs();
     }
 }
