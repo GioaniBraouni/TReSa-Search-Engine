@@ -21,25 +21,32 @@ import java.net.MalformedURLException;
  */
 public class App extends Application
 {
-    {
 
 
-        @Override
-        public void start(Stage stage) throws FileNotFoundException, MalformedURLException {
+    @Override
+    public void start(Stage stage) throws FileNotFoundException, MalformedURLException {
 
         final FileChooser fileChooser = new FileChooser();
+
+        final DirectoryChooser directoryChooser = new DirectoryChooser();
+
 
         fileChooser.getExtensionFilters().add( // Only txt documents
                 new FileChooser.ExtensionFilter("Text Files","*.txt")
         );
 
+
         BorderPane borderPane = new BorderPane();
 
-        Button viewFiles = new Button("File");
+        Button addFiles = new Button("Add File");
+
+        Button addDirectory = new Button("Add Folder");
 
         HBox forButtons = new HBox();
 
-        forButtons.getChildren().add(viewFiles);
+        forButtons.getChildren().add(addFiles);
+
+        forButtons.getChildren().add(addDirectory);
 
         VBox box = new VBox(20);
 
@@ -72,11 +79,12 @@ public class App extends Application
         stage.show();
 
 
-        viewFiles.setOnAction(new EventHandler<ActionEvent>() { // Gets path of Files
+        addFiles.setOnAction(new EventHandler<ActionEvent>() { // Gets path of Files
             @Override
             public void handle(ActionEvent actionEvent) {
 
                 List<File> list = fileChooser.showOpenMultipleDialog(stage);
+
                 if (list != null){
                     for (File file : list){
                         String url = file.getAbsolutePath();
@@ -84,14 +92,45 @@ public class App extends Application
                              PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
                         ){
 
-                            toServer.println(url);
+                            toServer.println("@@@"+url);
 
                         }catch (IOException e){
-                            e.printStackTrace();
+                            System.err.println("Server Down");
                         }
                     }
                 }
 
+            }
+        });
+
+
+        addDirectory.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                File fileDir = directoryChooser.showDialog(stage);
+
+                if (fileDir != null){
+                    File[] fileList = fileDir.listFiles();
+//                    for(File file:fileList) {
+//                        if (!file.toString().contains(".txt")) {
+//                            Alert alert = new Alert(Alert.AlertType.ERROR, "Only txt file " +
+//                                    "extension is valid!", ButtonType.CLOSE);
+//                            alert.showAndWait();
+//                            fileList = null;
+//                            break;
+//                        }
+//                    }
+                    try (Socket socket = new Socket("localhost",5555);
+                         PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
+                    ){
+
+                        toServer.println("!@#" +fileDir.getAbsolutePath());
+
+                    }catch (IOException e){
+                        System.err.println("Server Down");
+                    }
+
+                }
             }
         });
 
@@ -103,8 +142,9 @@ public class App extends Application
 
     }
 
-        public static void main(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
+
 
 }

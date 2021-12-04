@@ -19,7 +19,6 @@ public class LuceneTester {
     CustomIndex cIndex;
     SecondIndex sec;
 
-
     public static void main(String[] args) {
         Server server = new Server();
         server.start();
@@ -35,7 +34,7 @@ public class LuceneTester {
                     //tester = new LuceneTester();
                     tester.createIndex();
 
-                } catch (IOException e) {
+                } catch (IOException | ParseException e) {
                     e.printStackTrace();
                 }
             }else if(selection == 2){ // Add folder
@@ -43,19 +42,21 @@ public class LuceneTester {
                 String selectedDir = scanner.next();
                 try {
                     tester.createOneIndex(selectedDir);
+                    tester.search("zone");
 
-                } catch (IOException e) {
+                } catch (IOException | ParseException e) {
                     e.printStackTrace();
                 }
 
             }else if(selection == 3){ // Add Single File
                 System.out.println("Name of file");
-                String selectedFile = scanner.next();
+                String selectedFile = server.complete;
                 try {
                     tester.singleFile(selectedFile);
-                }catch (IOException e){
+                }catch (IOException | ParseException e){
                     e.printStackTrace();
                 }
+                server.complete = "";
 
             }else if (selection == 4){ // Delete file
                 System.out.println("Name of the file for deletion");
@@ -63,7 +64,8 @@ public class LuceneTester {
                 try {
                     //tester.fileToDelete(fileToDelete);
                     tester.testFileToDelete(fileToDelete);
-                }catch (IOException e){
+                    tester.search("zone");
+                }catch (IOException | ParseException e){
                     e.printStackTrace();
                 }
             }
@@ -72,7 +74,7 @@ public class LuceneTester {
 
 
     }
-    private void createIndex() throws IOException {
+    private void createIndex() throws IOException, ParseException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -85,7 +87,7 @@ public class LuceneTester {
 
     //TODO MERGE createIndex && createOneIndex AT THE END
 
-    private void createOneIndex(String selectedDir) throws IOException {
+    protected void createOneIndex(String selectedDir) throws IOException, ParseException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -96,7 +98,7 @@ public class LuceneTester {
                 (endTime-startTime)+" ms");
     }
 
-    protected void singleFile(String selectedFile) throws IOException {
+    protected void singleFile(String selectedFile) throws IOException, ParseException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -106,8 +108,6 @@ public class LuceneTester {
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
     }
-
-
 
     private void testFileToDelete(String deleteFile) throws IOException {
         File file = new File(deleteFile);
@@ -134,3 +134,4 @@ public class LuceneTester {
         searcher.close();
     }
 }
+

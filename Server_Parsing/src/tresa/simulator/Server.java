@@ -1,5 +1,7 @@
 package tresa.simulator;
 
+import org.apache.lucene.queryparser.classic.ParseException;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,19 +26,36 @@ public class Server extends Thread {
                 while (fromClient.hasNextLine()) {
                     String clientString = fromClient.nextLine();
 
+
+
                     this.complete = clientString;
 
                     if (!this.complete.equals("")) {
-
-                        LuceneTester tester = new LuceneTester();
-                        System.out.println("Name of file");
-                        String selectedFile = this.complete;
-                        try {
-                            tester.singleFile(selectedFile);
-                        }catch (IOException e){
-                            e.printStackTrace();
+                        if (this.complete.contains("@@@")) {
+                            this.complete = this.complete.substring(3);
+                            LuceneTester tester = new LuceneTester();
+                            System.out.println("Name of file");
+                            String selectedFile = this.complete;
+                            try {
+                                tester.singleFile(selectedFile);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            this.complete = "";
+                        }else if (this.complete.contains("!@#")){
+                            this.complete = this.complete.substring(3);
+                            LuceneTester tester = new LuceneTester();
+                            System.out.println("Name of file");
+                            String selectedFile = this.complete;
+                            try {
+                                tester.createOneIndex(selectedFile);
+                            } catch (IOException | ParseException e) {
+                                e.printStackTrace();
+                            }
+                            this.complete = "";
                         }
-                        this.complete = "";
 
 //                        System.out.println(this.complete);
 
