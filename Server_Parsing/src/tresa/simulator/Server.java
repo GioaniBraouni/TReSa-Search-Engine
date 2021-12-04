@@ -6,7 +6,8 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Server extends Thread {
-    private String complete = "";
+    public String complete = "";
+    public static int ended = 0;
 
 
 
@@ -16,10 +17,7 @@ public class Server extends Thread {
 
         try (ServerSocket serverSocket = new ServerSocket(5555)) {
 
-
-            int i = 1;
             while (true) {
-
                 Socket client = serverSocket.accept();
                 Scanner fromClient = new Scanner(client.getInputStream());
 
@@ -30,17 +28,25 @@ public class Server extends Thread {
 
                     if (!this.complete.equals("")) {
 
-                        System.out.println(this.complete);
-                        complete = "";
+                        LuceneTester tester = new LuceneTester();
+                        System.out.println("Name of file");
+                        String selectedFile = this.complete;
+                        try {
+                            tester.singleFile(selectedFile);
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                        this.complete = "";
+
+//                        System.out.println(this.complete);
 
                     }
                 }
-
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
     }
 

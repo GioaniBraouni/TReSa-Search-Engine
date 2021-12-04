@@ -96,7 +96,7 @@ public class LuceneTester {
                 (endTime-startTime)+" ms");
     }
 
-    private void singleFile(String selectedFile) throws IOException {
+    protected void singleFile(String selectedFile) throws IOException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
