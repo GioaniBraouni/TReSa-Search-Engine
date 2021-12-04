@@ -21,6 +21,8 @@ public class LuceneTester {
 
 
     public static void main(String[] args) {
+        Server server = new Server();
+        server.start();
         LuceneTester tester = new LuceneTester();
         Scanner scanner = new Scanner(System.in);
 
