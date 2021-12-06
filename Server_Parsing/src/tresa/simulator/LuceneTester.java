@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
@@ -14,7 +15,7 @@ import org.apache.lucene.search.TopDocs;
 
 public class LuceneTester {
     String indexDir = "Index"; // REDO
-    String dataDir = "Reuters";
+    String dataDir = "Server_Parsing/Reuters";
     Indexer indexer;
     Searcher searcher;
     CustomIndex cIndex;
@@ -30,6 +31,7 @@ public class LuceneTester {
             int selection;
             System.out.println("Enter Choice");
             selection = scanner.nextInt();
+            scanner.nextLine();
             if (selection == 1){ // Adds Reuters TODO REMOVE IN THE END
                 try {
                     //tester = new LuceneTester();
@@ -43,7 +45,6 @@ public class LuceneTester {
                 String selectedDir = scanner.next();
                 try {
                     tester.createOneIndex(selectedDir);
-                    tester.search("zone");
 
                 } catch (IOException | ParseException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
@@ -65,10 +66,26 @@ public class LuceneTester {
                 try {
                     //tester.fileToDelete(fileToDelete);
                     tester.testFileToDelete(fileToDelete);
-                    tester.search("zone");
-                }catch (IOException | ParseException | NoSuchAlgorithmException e){
+                }catch (IOException |  NoSuchAlgorithmException e){
                     e.printStackTrace();
                 }
+            }
+            else if(selection == 5) //Query search
+            {
+                try
+                {
+                    String queryInput = scanner.nextLine();
+                    //System.out.println(queryInput);
+                    Searcher docSearcher = new Searcher();
+                    ScoreDoc[] searchResults = docSearcher.search(queryInput);
+                    printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
+                    docSearcher.closeReader();
+
+                } catch (IOException | ParseException e)
+                {
+                    e.printStackTrace();
+                }
+
             }
 
         }
@@ -118,22 +135,29 @@ public class LuceneTester {
         sec.close();
     }
 
-    private void search(String searchQuery) throws IOException,
-            ParseException {
-        searcher = new Searcher(indexDir);
-        long startTime = System.currentTimeMillis();
-        TopDocs hits = searcher.search(searchQuery);
-        long endTime = System.currentTimeMillis();
-
-
-        System.out.println(hits.totalHits +" documents found. Time :" +
-                (endTime - startTime));
-        for(ScoreDoc scoreDoc : hits.scoreDocs) {
-            Document doc = searcher.getDocument(scoreDoc);
-            System.out.println("File: " +
-                    doc.get(LuceneConstants.FILE_PATH));
-        }
-        searcher.close();
+    private static void printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
+        if (searchResults != null && searchResults.length > 0)
+        {
+            System.out.println(searchResults.length + " documents found");
+            for (int i = 0; i < searchResults.length; i++)
+            {
+                int docIndex = searchResults[i].doc;
+                Document doc;
+                try {
+                    doc = indexSearcher.doc(docIndex);
+                    String filepath = doc.get("filepath");
+                    File file = new File(filepath);
+                    String filename = file.getName();
+                    System.out.println("Document Name: " + filename);
+                    System.out.println("Rank: " + (i + 1));
+                    System.out.println("Path: " + filepath);
+                    System.out.println("Relevance Score: " + searchResults[i].score);
+                } catch (IOException e) {
+                    System.out.println("Document with id - " + docIndex + " no longer exists");
+                }
+            }
+        } else
+            System.out.println("No documents found for the query: " + searchQuery);
     }
 }
 

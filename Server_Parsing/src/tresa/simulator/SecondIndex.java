@@ -14,16 +14,19 @@ import org.apache.lucene.analysis.*;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
+import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 
 public class SecondIndex{
@@ -85,27 +88,27 @@ public class SecondIndex{
         StringBuilder hash = new StringBuilder(file.toString());
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 
+        Preprocessor prep;
+
         String currentLine; // If line contains <TITLE> give more weight. (IDEA)
-        while ((currentLine = br.readLine()) != null) {
-
-
+        while ((currentLine = br.readLine()) != null)
+        {
             String result = currentLine.toLowerCase(Locale.ROOT);
             hash.append(result);
 
-            if (result.contains("title")) {
+            prep = new Preprocessor(currentLine);
 
-                document.add(new Field(LuceneConstants.TITLE, currentLine, TextField.TYPE_STORED));
+            if (result.contains("title")) {
+                document.add(new Field(LuceneConstants.TITLE, prep.toString(), TextField.TYPE_STORED));
             } else if (result.contains("places")) {
-                //result = result.replaceAll("places"," ");
-                document.add(new Field(LuceneConstants.PLACES, currentLine, TextField.TYPE_STORED));
+                document.add(new Field(LuceneConstants.PLACES, prep.toString(), TextField.TYPE_STORED));
             } else if (result.contains("people")) {
                 //result = result.replaceAll("people"," ");
-                document.add(new Field(LuceneConstants.PEOPLE, currentLine, TextField.TYPE_STORED));
-            } else {
-                document.add(new Field(LuceneConstants.BODY, currentLine, TextField.TYPE_STORED));
+                document.add(new Field(LuceneConstants.PEOPLE, prep.toString(), TextField.TYPE_STORED));
+            } else if (result.contains("body")){
+                document.add(new Field(LuceneConstants.BODY, prep.toString(), TextField.TYPE_STORED));
             }
-
-
+            //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
         }
         messageDigest.update(hash.toString().getBytes());
         hash = new StringBuilder(new String(messageDigest.digest()));

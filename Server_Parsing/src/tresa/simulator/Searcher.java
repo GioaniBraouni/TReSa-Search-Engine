@@ -3,10 +3,11 @@ package tresa.simulator;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
+import java.util.StringTokenizer;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -16,36 +17,52 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class Searcher {
     IndexSearcher indexSearcher;
     Directory indexDirectory;
     IndexReader indexReader;
-    QueryParser queryParser;
-    Query query;
+    Analyzer analyzer;
 
-    public Searcher(String indexDirectoryPath) throws IOException {
-        Path indexPath = Paths.get(indexDirectoryPath);
+
+    public Searcher() throws IOException
+    {
+        Path indexPath = Paths.get("Index");
         indexDirectory = FSDirectory.open(indexPath);
         indexReader = DirectoryReader.open(indexDirectory);
         indexSearcher = new IndexSearcher(indexReader);
-        queryParser = new QueryParser(LuceneConstants.CONTENTS, new
-                StandardAnalyzer());
     }
 
-    public TopDocs search(String searchQuery) throws IOException,
-            ParseException {
-        query = queryParser.parse(searchQuery);
-        System.out.println("query: "+ query.toString());
-        return indexSearcher.search(query, LuceneConstants.MAX_SEARCH);
+    //public BooleanQueryParser(String )
+
+    public ScoreDoc[] search(String query) throws IOException,
+            ParseException
+    {
+        TopScoreDocCollector docCollector =  TopScoreDocCollector.create(10000, 20000);
+        ScoreDoc[] searchResults = null;
+        System.out.println("Searching for '" + query + "' using QueryParser");
+
+
+        analyzer = new StandardAnalyzer();
+        MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
+                analyzer);
+
+        Preprocessor prep = new Preprocessor(query);
+        Query searchQuery = queryParser.parse(prep.toString());
+
+        indexSearcher.search(searchQuery, docCollector);
+        searchResults = docCollector.topDocs().scoreDocs;
+
+        return searchResults;
     }
 
-    public Document getDocument(ScoreDoc scoreDoc) throws
-            CorruptIndexException, IOException {
-        return indexSearcher.doc(scoreDoc.doc);
+    public IndexSearcher getIndexSearcher()
+    {
+        return this.indexSearcher;
     }
-    public void close() throws IOException {
-        indexReader.close();
-        indexDirectory.close();
+    public void closeReader() throws IOException
+    {
+        this.indexReader.close();
     }
 }
