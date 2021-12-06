@@ -8,5 +8,6 @@ public class LuceneConstants {
     public static final String PEOPLE = "people";
     public static final String TITLE = "title";
     public static final String BODY = "body";
+    public static final String ID = "id";
     public static final int MAX_SEARCH = 10;
 }

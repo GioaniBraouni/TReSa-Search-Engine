@@ -6,6 +6,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import org.apache.lucene.analysis.*;
@@ -28,6 +30,7 @@ public class SecondIndex{
     private IndexWriter writer;
     IndexSearcher searcher;
     String indexDir = "Index";
+
     /*
     TODO FOR INDEX WRITER
     In either case, documents are added with addDocument and removed with deleteDocuments(Term...) or deleteDocuments(Query...).
@@ -72,23 +75,25 @@ public class SecondIndex{
         writer.close();
     }
 
-    protected Document getDocument(File file) throws IOException {
+    protected Document getDocument(File file) throws IOException, NoSuchAlgorithmException {
 
 
         Document document = new Document();
         //index file contents
         BufferedReader br = new BufferedReader(new FileReader(file));
 
+        StringBuilder hash = new StringBuilder(file.toString());
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 
         String currentLine; // If line contains <TITLE> give more weight. (IDEA)
         while ((currentLine = br.readLine()) != null) {
 
 
             String result = currentLine.toLowerCase(Locale.ROOT);
-
+            hash.append(result);
 
             if (result.contains("title")) {
-                //result = result.replaceAll("title"," ");
+
                 document.add(new Field(LuceneConstants.TITLE, currentLine, TextField.TYPE_STORED));
             } else if (result.contains("places")) {
                 //result = result.replaceAll("places"," ");
@@ -101,23 +106,24 @@ public class SecondIndex{
             }
 
 
-
-
-
         }
+        messageDigest.update(hash.toString().getBytes());
+        hash = new StringBuilder(new String(messageDigest.digest()));
 
-
+        Field theId = new Field(LuceneConstants.ID, hash.toString(),StringField.TYPE_STORED);
         Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
         //index file path
         Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
+        document.add(theId);
         document.add(fileNameField);
         document.add(filePathField);
+
         br.close();
         return document;
     }
 
     //DELE
-    private void deleteDoc(File file) throws IOException {
+    private void deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
         Document doc = getDocument(file);
         Term fileTerm = new Term(LuceneConstants.FILE_NAME,doc.get(LuceneConstants.FILE_NAME));
         Term contentTerm = new Term(LuceneConstants.BODY,doc.get(LuceneConstants.BODY));
@@ -142,26 +148,34 @@ public class SecondIndex{
 
     }
     //DELE
-    public void deletingFiles(String fileName) throws IOException {
+    public void deletingFiles(String fileName) throws IOException, NoSuchAlgorithmException {
         File file = new File(fileName);
         System.out.println("Deleting from Index file: " + file.getCanonicalPath());
         deleteDoc(file);
         close();
     }
 
-    private void indexFile(File file) throws IOException, ParseException {
+    private void indexFile(File file) throws IOException, NoSuchAlgorithmException {
         Path path = Paths.get(indexDir);
         File dir = new File(indexDir);
-        if (Objects.requireNonNull(dir.listFiles()).length < 2 || !isAlreadyIndexed(file)) {
-            System.out.println("Indexing " + file.getCanonicalPath());
-            Document document = getDocument(file);
-            //TODO edw prepei na valw chack gia ta fields. Prepei prwta na parw to document
-            writer.addDocument(document);
-        }
+
+        System.out.println("Indexing " + file.getCanonicalPath());
+        Document document = getDocument(file);
+        if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND){
+            if (!isAlreadyIndexed(document)){
+                writer.addDocument(document);
+            }else {
+                System.out.println("exists");
+            }
+
+
+        }  //TODO edw prepei na valw check gia ta fields. Prepei prwta na parw to document
+        //writer.addDocument(document);
+
     }
 
     public int createIndex(String dataDirPath, FileFilter filter) throws
-            IOException, ParseException {
+            IOException, ParseException, NoSuchAlgorithmException {
         //get all files in the data directory
         File[] files = new File(dataDirPath).listFiles();
         for (File file : files) {
@@ -179,7 +193,7 @@ public class SecondIndex{
 
 
     public int createSingleIndex(String fileName, FileFilter filter) throws
-            IOException, ParseException {
+            IOException, ParseException, NoSuchAlgorithmException {
         //get all files in the data directory
         File files = new File(fileName);
 
@@ -194,15 +208,21 @@ public class SecondIndex{
         return writer.numRamDocs();
     }
 
-    private boolean isAlreadyIndexed(File file) throws IOException {
+    private boolean isAlreadyIndexed(Document document) throws IOException {
         // Prwto check gia file name
-        String url = file.getAbsolutePath();
-        TermQuery query1 = new TermQuery(new Term(LuceneConstants.FILE_PATH,url));
-        BooleanQuery matchingQuery = new BooleanQuery.Builder()
-                .add(query1, BooleanClause.Occur.SHOULD)
-                .build();
+
         Path path = Paths.get(indexDir);
         Directory index = FSDirectory.open(path);
+        if (!DirectoryReader.indexExists(index))
+        {
+            return false;
+        }
+        TermQuery query1 = new TermQuery(new Term(LuceneConstants.ID,document.get(LuceneConstants.ID)));
+        BooleanQuery matchingQuery = new BooleanQuery.Builder()
+                .add(query1,BooleanClause.Occur.SHOULD)
+                .build();
+
+
         IndexReader r = DirectoryReader.open(index);
         searcher = new IndexSearcher(r);
 
@@ -217,19 +237,6 @@ public class SecondIndex{
         r.close();
         return true;
 
-//        searcher = new IndexSearcher();
-//        String url = file.getAbsolutePath();
-//        TopDocs result = searcher.search(new TermQuery(new Term(LuceneConstants.FILE_PATH,url)),1);
-//        if (result.totalHits.value == 0){
-//            return true;
-//        }
-//        return false;
-    }
-
-    private static boolean isDirEmpty(final Path directory) throws IOException {
-        try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
-            return !dirStream.iterator().hasNext();
-        }
     }
 
 }

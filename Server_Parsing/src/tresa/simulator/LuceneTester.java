@@ -2,6 +2,7 @@ package tresa.simulator;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 import org.apache.lucene.document.Document;
@@ -34,26 +35,26 @@ public class LuceneTester {
                     //tester = new LuceneTester();
                     tester.createIndex();
 
-                } catch (IOException | ParseException e) {
+                } catch (IOException | ParseException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
             }else if(selection == 2){ // Add folder
-                System.out.println("Name of dir");
+                //System.out.println("Name of dir");
                 String selectedDir = scanner.next();
                 try {
                     tester.createOneIndex(selectedDir);
                     tester.search("zone");
 
-                } catch (IOException | ParseException e) {
+                } catch (IOException | ParseException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
 
             }else if(selection == 3){ // Add Single File
-                System.out.println("Name of file");
+                //System.out.println("Name of file");
                 String selectedFile = server.complete;
                 try {
                     tester.singleFile(selectedFile);
-                }catch (IOException | ParseException e){
+                }catch (IOException | ParseException | NoSuchAlgorithmException e){
                     e.printStackTrace();
                 }
                 server.complete = "";
@@ -65,7 +66,7 @@ public class LuceneTester {
                     //tester.fileToDelete(fileToDelete);
                     tester.testFileToDelete(fileToDelete);
                     tester.search("zone");
-                }catch (IOException | ParseException e){
+                }catch (IOException | ParseException | NoSuchAlgorithmException e){
                     e.printStackTrace();
                 }
             }
@@ -74,7 +75,7 @@ public class LuceneTester {
 
 
     }
-    private void createIndex() throws IOException, ParseException {
+    private void createIndex() throws IOException, ParseException, NoSuchAlgorithmException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -87,7 +88,7 @@ public class LuceneTester {
 
     //TODO MERGE createIndex && createOneIndex AT THE END
 
-    protected void createOneIndex(String selectedDir) throws IOException, ParseException {
+    protected void createOneIndex(String selectedDir) throws IOException, ParseException, NoSuchAlgorithmException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -98,7 +99,7 @@ public class LuceneTester {
                 (endTime-startTime)+" ms");
     }
 
-    protected void singleFile(String selectedFile) throws IOException, ParseException {
+    protected void singleFile(String selectedFile) throws IOException, ParseException, NoSuchAlgorithmException {
         sec = new SecondIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
@@ -109,7 +110,8 @@ public class LuceneTester {
                 (endTime-startTime)+" ms");
     }
 
-    private void testFileToDelete(String deleteFile) throws IOException {
+
+    private void testFileToDelete(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
         sec = new SecondIndex(indexDir);
         sec.deletingFiles(deleteFile);
@@ -134,4 +136,5 @@ public class LuceneTester {
         searcher.close();
     }
 }
+
 
