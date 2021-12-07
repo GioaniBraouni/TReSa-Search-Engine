@@ -2,7 +2,6 @@ package tresa.simulator;
 
 
 import java.io.*;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,22 +13,19 @@ import org.apache.lucene.analysis.*;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
-import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
-import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.tartarus.snowball.ext.PorterStemmer;
 
 
-public class SecondIndex{
+public class TReSaIndex {
     private IndexWriter writer;
     IndexSearcher searcher;
     String indexDir = "Index";
@@ -40,7 +36,7 @@ public class SecondIndex{
     A document can be updated with updateDocument (which just deletes and then adds the entire document).
     When finished adding, deleting and updating documents, close should be called.
      */
-    public SecondIndex(String indexDirectoryPath) throws IOException {
+    public TReSaIndex(String indexDirectoryPath) throws IOException {
         //this directory will contain the indexes
         Path indexPath = Paths.get(indexDirectoryPath);
         if (!Files.exists(indexPath)) {

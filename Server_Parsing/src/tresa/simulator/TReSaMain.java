@@ -9,22 +9,19 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
 
 // Added 8.0.0
 
-public class LuceneTester {
+public class TReSaMain {
     String indexDir = "Index"; // REDO
     String dataDir = "Server_Parsing/Reuters";
-    Indexer indexer;
-    Searcher searcher;
-    CustomIndex cIndex;
-    SecondIndex sec;
+    QuerySearch querySearch;
+    TReSaIndex sec;
 
     public static void main(String[] args) {
         Server server = new Server();
         server.start();
-        LuceneTester tester = new LuceneTester();
+        TReSaMain tester = new TReSaMain();
         Scanner scanner = new Scanner(System.in);
 
         while (true){
@@ -81,10 +78,10 @@ public class LuceneTester {
                 {
                     String queryInput = scanner.nextLine();
                     //System.out.println(queryInput);
-                    Searcher docSearcher = new Searcher();
-                    ScoreDoc[] searchResults = docSearcher.search(queryInput);
-                    printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
-                    docSearcher.closeReader();
+                    QuerySearch docQuerySearch = new QuerySearch();
+                    ScoreDoc[] searchResults = docQuerySearch.search(queryInput);
+                    printSearchResults(searchResults,queryInput, docQuerySearch.getIndexSearcher());
+                    docQuerySearch.closeReader();
 
                 } catch (IOException | ParseException e)
                 {
@@ -115,7 +112,7 @@ public class LuceneTester {
 
     }
     private void createIndex() throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new SecondIndex(indexDir);
+        sec = new TReSaIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(dataDir, new TextFileFilter());
@@ -128,7 +125,7 @@ public class LuceneTester {
     //TODO MERGE createIndex && createOneIndex AT THE END
 
     protected void createOneIndex(String selectedDir) throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new SecondIndex(indexDir);
+        sec = new TReSaIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(selectedDir, new TextFileFilter());
@@ -139,7 +136,7 @@ public class LuceneTester {
     }
 
     protected void singleFile(String selectedFile) throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new SecondIndex(indexDir);
+        sec = new TReSaIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createSingleIndex(selectedFile, new TextFileFilter());
@@ -152,7 +149,7 @@ public class LuceneTester {
 
     private void testFileToDelete(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
-        sec = new SecondIndex(indexDir);
+        sec = new TReSaIndex(indexDir);
         sec.deletingFiles(deleteFile);
         sec.close();
     }

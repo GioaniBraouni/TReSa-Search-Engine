@@ -34,7 +34,7 @@ public class Server extends Thread {
                     if (!this.complete.equals("")) {
                         if (this.complete.contains("@@@")) {
                             this.complete = this.complete.substring(3);
-                            LuceneTester tester = new LuceneTester();
+                            TReSaMain tester = new TReSaMain();
                             System.out.println("Name of file");
                             String selectedFile = this.complete;
                             try {
@@ -45,7 +45,7 @@ public class Server extends Thread {
                             this.complete = "";
                         }else if (this.complete.contains("!@#")){
                             this.complete = this.complete.substring(3);
-                            LuceneTester tester = new LuceneTester();
+                            TReSaMain tester = new TReSaMain();
                             //System.out.println("Name of file");
                             String selectedFile = this.complete;
                             try {
