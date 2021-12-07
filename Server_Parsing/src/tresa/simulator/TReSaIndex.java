@@ -29,6 +29,7 @@ public class TReSaIndex {
     private IndexWriter writer;
     IndexSearcher searcher;
     String indexDir = "Index";
+    HashSet<String> articleID = new HashSet<>();
 
     /*
     TODO FOR INDEX WRITER
@@ -55,15 +56,7 @@ public class TReSaIndex {
 
         stopSet.addAll(enStopSet);
 
-        Map<String,Analyzer> analyzerPerField = new HashMap<>();
-
-        analyzerPerField.put(LuceneConstants.TITLE,new StandardAnalyzer(stopSet));
-        analyzerPerField.put(LuceneConstants.PLACES,new StandardAnalyzer(stopSet));
-
-
-        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(stopSet),analyzerPerField);
-
-        IndexWriterConfig config = new IndexWriterConfig(wrapper); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
+        IndexWriterConfig config = new IndexWriterConfig(new EnglishAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
 
         writer = new IndexWriter(indexDirectory, config); // The IndexWriterConfig.OpenMode option on IndexWriterConfig.setOpenMode(OpenMode) determines whether a new index is created, or whether an existing index is opened.
     }
@@ -81,16 +74,12 @@ public class TReSaIndex {
         //index file contents
         BufferedReader br = new BufferedReader(new FileReader(file));
 
-        StringBuilder hash = new StringBuilder(file.toString());
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-
         Preprocessor prep;
 
         String currentLine; // If line contains <TITLE> give more weight. (IDEA)
         while ((currentLine = br.readLine()) != null)
         {
             String result = currentLine.toLowerCase(Locale.ROOT);
-            hash.append(result);
 
             prep = new Preprocessor(currentLine);
 
@@ -106,14 +95,10 @@ public class TReSaIndex {
             }
             //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
         }
-        messageDigest.update(hash.toString().getBytes());
-        hash = new StringBuilder(new String(messageDigest.digest()));
 
-        Field theId = new Field(LuceneConstants.ID, hash.toString(),StringField.TYPE_STORED);
         Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
         //index file path
         Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
-        document.add(theId);
         document.add(fileNameField);
         document.add(filePathField);
 
@@ -158,17 +143,21 @@ public class TReSaIndex {
         Path path = Paths.get(indexDir);
         File dir = new File(indexDir);
 
-        System.out.println("Indexing " + file.getCanonicalPath());
         Document document = getDocument(file);
-        if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND){
-            if (!isAlreadyIndexed(document)){
+
+            System.out.print("Does the file exists in the index? ");
+            if (!articleID.contains(file.getName()))
+            {
+                System.out.println(articleID.contains(file.getName()));
+                articleID.add(file.getName());
+                System.out.println("Indexing " + file.getCanonicalPath());
                 writer.addDocument(document);
             }else {
-                System.out.println("exists");
+                System.out.println(articleID.contains(file.getName()));
             }
 
 
-        }  //TODO edw prepei na valw check gia ta fields. Prepei prwta na parw to document
+          //TODO edw prepei na valw check gia ta fields. Prepei prwta na parw to document
         //writer.addDocument(document);
 
     }
@@ -205,37 +194,6 @@ public class TReSaIndex {
         }
 
         return writer.numRamDocs();
-    }
-
-    private boolean isAlreadyIndexed(Document document) throws IOException {
-        // Prwto check gia file name
-
-        Path path = Paths.get(indexDir);
-        Directory index = FSDirectory.open(path);
-        if (!DirectoryReader.indexExists(index))
-        {
-            return false;
-        }
-        TermQuery query1 = new TermQuery(new Term(LuceneConstants.ID,document.get(LuceneConstants.ID)));
-        BooleanQuery matchingQuery = new BooleanQuery.Builder()
-                .add(query1,BooleanClause.Occur.SHOULD)
-                .build();
-
-
-        IndexReader r = DirectoryReader.open(index);
-        searcher = new IndexSearcher(r);
-
-        TopDocs results = searcher.search(matchingQuery,1);
-
-        if (results.totalHits.value == 0){
-            System.out.println(results.totalHits.value );
-            r.close();
-            return false;
-
-        }
-        r.close();
-        return true;
-
     }
 
 }

@@ -16,7 +16,15 @@ public class TReSaMain {
     String indexDir = "Index"; // REDO
     String dataDir = "Server_Parsing/Reuters";
     QuerySearch querySearch;
-    TReSaIndex sec;
+    static TReSaIndex sec;
+
+    {
+        try {
+            sec = new TReSaIndex(indexDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         Server server = new Server();
@@ -31,6 +39,7 @@ public class TReSaMain {
             System.out.println("Add a single article(3)");
             System.out.println("Delete a article(4)");
             System.out.println("Enter a query(5)");
+            System.out.println("Quit(7)");
             System.out.println("Enter Choice");
             selection = scanner.nextInt();
             scanner.nextLine();
@@ -106,18 +115,24 @@ public class TReSaMain {
                 }
 
             }
+            else
+            {
+                try {
+                    sec.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
         }
 
 
     }
     private void createIndex() throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(dataDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
     }
