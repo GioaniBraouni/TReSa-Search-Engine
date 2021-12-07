@@ -29,6 +29,11 @@ public class LuceneTester {
 
         while (true){
             int selection;
+            System.out.println("Add reuters(1)");
+            System.out.println("Add a folder of articles(2)");
+            System.out.println("Add a single article(3)");
+            System.out.println("Delete a article(4)");
+            System.out.println("Enter a query(5)");
             System.out.println("Enter Choice");
             selection = scanner.nextInt();
             scanner.nextLine();
@@ -78,6 +83,23 @@ public class LuceneTester {
                     //System.out.println(queryInput);
                     Searcher docSearcher = new Searcher();
                     ScoreDoc[] searchResults = docSearcher.search(queryInput);
+                    printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
+                    docSearcher.closeReader();
+
+                } catch (IOException | ParseException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }else if(selection == 6) //BooleanQuery search
+            {
+                try
+                {
+                    String queryInput = scanner.nextLine();
+                    String queryInput2 = scanner.nextLine();
+                    //System.out.println(queryInput);
+                    Searcher docSearcher = new Searcher();
+                    ScoreDoc[] searchResults = docSearcher.testSearch(queryInput,queryInput2);
                     printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
                     docSearcher.closeReader();
 
@@ -160,5 +182,3 @@ public class LuceneTester {
             System.out.println("No documents found for the query: " + searchQuery);
     }
 }
-
-
