@@ -9,13 +9,13 @@ public class Preprocessor {
     private PorterStemmer stemmer = new PorterStemmer();
     private StringBuilder stringBuilder = new StringBuilder();
     private StringTokenizer tokens = null;
-    private String currentLine = null;
+    private String currentLine;
 
     public Preprocessor(String currentLine) {
         this.currentLine = currentLine;
     }
 
-    private void currentLinePrep() {
+    private String currentLinePrep() {
         String result = this.currentLine.toLowerCase(Locale.ROOT);
 
         tokens = new StringTokenizer(currentLine);
@@ -26,12 +26,11 @@ public class Preprocessor {
             stemmer.setCurrent(tokens.nextToken());
             stemmer.stem();
             stringBuilder.append(stemmer.getCurrent() + " ");
-
         }
+        return stringBuilder.toString();
     }
 
-    @Override
     public String toString() {
-        return stringBuilder + "";
+        return currentLinePrep() + "";
     }
 }

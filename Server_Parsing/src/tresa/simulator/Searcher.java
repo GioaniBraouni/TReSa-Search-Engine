@@ -41,7 +41,6 @@ public class Searcher {
     {
         TopScoreDocCollector docCollector =  TopScoreDocCollector.create(10000, 20000);
         ScoreDoc[] searchResults = null;
-        System.out.println("Searching for '" + query + "' using QueryParser");
 
 
         analyzer = new StandardAnalyzer();
@@ -49,6 +48,7 @@ public class Searcher {
                 analyzer);
 
         Preprocessor prep = new Preprocessor(query);
+        System.out.println("Searching for '" + prep.toString() + "' using QueryParser");
         Query searchQuery = queryParser.parse(prep.toString());
 
         indexSearcher.search(searchQuery, docCollector);
