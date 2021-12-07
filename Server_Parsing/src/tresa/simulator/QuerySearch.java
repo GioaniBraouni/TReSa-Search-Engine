@@ -23,14 +23,14 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.tartarus.snowball.ext.PorterStemmer;
 
-public class Searcher {
+public class QuerySearch {
     IndexSearcher indexSearcher;
     Directory indexDirectory;
     IndexReader indexReader;
     Analyzer analyzer;
 
 
-    public Searcher() throws IOException
+    public QuerySearch() throws IOException
     {
         Path indexPath = Paths.get("Index");
         indexDirectory = FSDirectory.open(indexPath);

@@ -95,7 +95,7 @@ public class TReSaMain {
                     String queryInput = scanner.nextLine();
                     String queryInput2 = scanner.nextLine();
                     //System.out.println(queryInput);
-                    Searcher docSearcher = new Searcher();
+                    QuerySearch docSearcher = new QuerySearch();
                     ScoreDoc[] searchResults = docSearcher.testSearch(queryInput,queryInput2);
                     printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
                     docSearcher.closeReader();
