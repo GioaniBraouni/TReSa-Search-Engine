@@ -1,12 +1,8 @@
 package tresa.simulator;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
-import java.util.StringTokenizer;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
@@ -15,13 +11,10 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.tartarus.snowball.ext.PorterStemmer;
 
 public class QuerySearch {
     IndexSearcher indexSearcher;
@@ -74,8 +67,8 @@ public class QuerySearch {
         MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
                 analyzer);
         queryParser.setDefaultOperator(QueryParser.OR_OPERATOR);
-        TermQuery query1 = new TermQuery(new Term(LuceneConstants.BODY,input));
-        TermQuery query2 = new TermQuery(new Term(LuceneConstants.BODY,input1));
+        TermQuery query1 = new TermQuery(new Term(TReSaFields.BODY,input));
+        TermQuery query2 = new TermQuery(new Term(TReSaFields.BODY,input1));
         Query searx = queryParser.parse("body:" + input + " NOT body:" +  input1);
 
         // prep = new Preprocessor(query);
@@ -96,8 +89,8 @@ public class QuerySearch {
         MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
                 analyzer);
         queryParser.setDefaultOperator(QueryParser.OR_OPERATOR);
-        TermQuery query1 = new TermQuery(new Term(LuceneConstants.BODY,input));
-        TermQuery query2 = new TermQuery(new Term(LuceneConstants.BODY,input2));
+        TermQuery query1 = new TermQuery(new Term(TReSaFields.BODY,input));
+        TermQuery query2 = new TermQuery(new Term(TReSaFields.BODY,input2));
         Query searx = queryParser.parse(query1 + "NOT" + query2);
         BooleanQuery matchingQuery = new BooleanQuery.Builder()
                 .add(query1,BooleanClause.Occur.SHOULD)

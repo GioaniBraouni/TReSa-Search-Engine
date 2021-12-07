@@ -5,17 +5,12 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import org.apache.lucene.analysis.*;
 
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-
-import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
-
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
@@ -53,7 +48,6 @@ public class TReSaIndex {
 
         CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
 
-
         stopSet.addAll(enStopSet);
 
         IndexWriterConfig config = new IndexWriterConfig(new EnglishAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
@@ -65,101 +59,6 @@ public class TReSaIndex {
 
     public void close() throws IOException {
         writer.close();
-    }
-
-    protected Document getDocument(File file) throws IOException, NoSuchAlgorithmException {
-
-
-        Document document = new Document();
-        //index file contents
-        BufferedReader br = new BufferedReader(new FileReader(file));
-
-        Preprocessor prep;
-
-        String currentLine; // If line contains <TITLE> give more weight. (IDEA)
-        while ((currentLine = br.readLine()) != null)
-        {
-            String result = currentLine.toLowerCase(Locale.ROOT);
-
-            prep = new Preprocessor(currentLine);
-
-            if (result.contains("title")) {
-                document.add(new Field(LuceneConstants.TITLE, prep.toString(), TextField.TYPE_STORED));
-            } else if (result.contains("places")) {
-                document.add(new Field(LuceneConstants.PLACES, prep.toString(), TextField.TYPE_STORED));
-            } else if (result.contains("people")) {
-                //result = result.replaceAll("people"," ");
-                document.add(new Field(LuceneConstants.PEOPLE, prep.toString(), TextField.TYPE_STORED));
-            } else if (result.contains("body")){
-                document.add(new Field(LuceneConstants.BODY, prep.toString(), TextField.TYPE_STORED));
-            }
-            //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
-        }
-
-        Field fileNameField = new Field(LuceneConstants.FILE_NAME, file.getName(), StringField.TYPE_STORED);
-        //index file path
-        Field filePathField = new Field(LuceneConstants.FILE_PATH, file.getCanonicalPath(), StringField.TYPE_STORED);
-        document.add(fileNameField);
-        document.add(filePathField);
-
-        br.close();
-        return document;
-    }
-
-    //DELE
-    private void deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
-        Document doc = getDocument(file);
-        Term fileTerm = new Term(LuceneConstants.FILE_NAME,doc.get(LuceneConstants.FILE_NAME));
-        Term contentTerm = new Term(LuceneConstants.BODY,doc.get(LuceneConstants.BODY));
-        Term pathTerm = new Term(LuceneConstants.FILE_PATH,doc.get(LuceneConstants.FILE_PATH));
-        Term titleTerm = new Term(LuceneConstants.TITLE,doc.get(LuceneConstants.TITLE));
-        Term placesTerm = new Term(LuceneConstants.PLACES,doc.get(LuceneConstants.PLACES));
-        Term peopleTerm = new Term(LuceneConstants.PEOPLE,doc.get(LuceneConstants.PEOPLE));
-
-        System.out.println(peopleTerm.toString());
-        System.out.println(contentTerm);
-
-        writer.deleteDocuments(fileTerm);
-        writer.deleteDocuments(contentTerm);
-        writer.deleteDocuments(pathTerm);
-        writer.deleteDocuments(titleTerm);
-        writer.deleteDocuments(placesTerm);
-        writer.deleteDocuments(peopleTerm);
-
-        //writer.commit();
-        writer.forceMergeDeletes();
-        writer.close();
-
-    }
-    //DELE
-    public void deletingFiles(String fileName) throws IOException, NoSuchAlgorithmException {
-        File file = new File(fileName);
-        System.out.println("Deleting from Index file: " + file.getCanonicalPath());
-        deleteDoc(file);
-        close();
-    }
-
-    private void indexFile(File file) throws IOException, NoSuchAlgorithmException {
-        Path path = Paths.get(indexDir);
-        File dir = new File(indexDir);
-
-        Document document = getDocument(file);
-
-            System.out.print("Does the file exists in the index? ");
-            if (!articleID.contains(file.getName()))
-            {
-                System.out.println(articleID.contains(file.getName()));
-                articleID.add(file.getName());
-                System.out.println("Indexing " + file.getCanonicalPath());
-                writer.addDocument(document);
-            }else {
-                System.out.println(articleID.contains(file.getName()));
-            }
-
-
-          //TODO edw prepei na valw check gia ta fields. Prepei prwta na parw to document
-        //writer.addDocument(document);
-
     }
 
     public int createIndex(String dataDirPath, FileFilter filter) throws
@@ -196,4 +95,90 @@ public class TReSaIndex {
         return writer.numRamDocs();
     }
 
+
+    private void indexFile(File file) throws IOException, NoSuchAlgorithmException {
+        Path path = Paths.get(indexDir);
+        File dir = new File(indexDir);
+
+        Document document = getDocument(file);
+
+        System.out.print("Does the file exists in the index? ");
+        if (!articleID.contains(file.getName()))
+        {
+            System.out.println(articleID.contains(file.getName()));
+            articleID.add(file.getName());
+            System.out.println("Indexing " + file.getCanonicalPath());
+            writer.addDocument(document);
+        }else {
+            System.out.println(articleID.contains(file.getName()));
+        }
+
+
+        //TODO edw prepei na valw check gia ta fields. Prepei prwta na parw to document
+        //writer.addDocument(document);
+
+    }
+
+    protected Document getDocument(File file) throws IOException, NoSuchAlgorithmException {
+
+
+        Document document = new Document();
+        //index file contents
+        BufferedReader articleReader = new BufferedReader(new FileReader(file));
+
+        Preprocessor prep;
+
+        String currentLine; // If line contains <TITLE> give more weight. (IDEA)
+        while ((currentLine = articleReader.readLine()) != null)
+        {
+            String result = currentLine.toLowerCase(Locale.ROOT);
+
+            prep = new Preprocessor(currentLine);
+
+            if (result.contains("title")) {
+                document.add(new Field(TReSaFields.TITLE, prep.toString(), TextField.TYPE_STORED));
+            } else if (result.contains("places")) {
+                document.add(new Field(TReSaFields.PLACES, prep.toString(), TextField.TYPE_STORED));
+            } else if (result.contains("people")) {
+                //result = result.replaceAll("people"," ");
+                document.add(new Field(TReSaFields.PEOPLE, prep.toString(), TextField.TYPE_STORED));
+            } else if (result.contains("body")){
+                document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
+            }
+            //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
+        }
+
+        articleReader.close();
+        return document;
+    }
+
+    //DELE
+    public void deletingFiles(String fileName) throws IOException, NoSuchAlgorithmException {
+        File file = new File(fileName);
+        System.out.println("Deleting from Index file: " + file.getCanonicalPath());
+        deleteDoc(file);
+        close();
+    }
+
+    //DELE
+    private void deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
+        Document doc = getDocument(file);
+        Term contentTerm = new Term(TReSaFields.BODY,doc.get(TReSaFields.BODY));
+        Term titleTerm = new Term(TReSaFields.TITLE,doc.get(TReSaFields.TITLE));
+        Term placesTerm = new Term(TReSaFields.PLACES,doc.get(TReSaFields.PLACES));
+        Term peopleTerm = new Term(TReSaFields.PEOPLE,doc.get(TReSaFields.PEOPLE));
+
+        System.out.println(peopleTerm.toString());
+        System.out.println(contentTerm);
+
+        writer.deleteDocuments(contentTerm);
+        writer.deleteDocuments(titleTerm);
+        writer.deleteDocuments(placesTerm);
+        writer.deleteDocuments(peopleTerm);
+
+        //writer.commit();
+        writer.forceMergeDeletes();
+        writer.close();
+
+    }
 }
