@@ -10,11 +10,16 @@ import java.util.*;
 
 import org.apache.lucene.analysis.*;
 
+import org.apache.lucene.analysis.core.StopFilterFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.synonym.SynonymFilterFactory;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -24,6 +29,7 @@ public class TReSaIndex {
     private IndexWriter writer;
     IndexSearcher searcher;
     String indexDir = "Index";
+    QueryParser queryParser;
     HashSet<String> articleID = new HashSet<>();
 
     /*
@@ -42,7 +48,7 @@ public class TReSaIndex {
         Directory indexDirectory = FSDirectory.open(indexPath);
 
 
-        List<String> stopWords = List.of("places","people","title","body");
+        List<String> stopWords = List.of("places","people","title","body","reuter");
 
         CharArraySet stopSet = new CharArraySet(stopWords,true);
 
@@ -50,7 +56,17 @@ public class TReSaIndex {
 
         stopSet.addAll(enStopSet);
 
-        IndexWriterConfig config = new IndexWriterConfig(new EnglishAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
+//        Analyzer custom = CustomAnalyzer.builder()
+//                .withTokenizer("standard")
+//                .addTokenFilter("lowercase")
+//                .addTokenFilter("stop")
+//                .whenTerm(t -> t.toString().contains(".") || t.toString().contains(","))
+//                .addTokenFilter("keepword")
+//                .addTokenFilter("stemmeroverride")
+//                .endwhen()
+//                .build();
+
+        IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
 
         writer = new IndexWriter(indexDirectory, config); // The IndexWriterConfig.OpenMode option on IndexWriterConfig.setOpenMode(OpenMode) determines whether a new index is created, or whether an existing index is opened.
     }
@@ -102,20 +118,18 @@ public class TReSaIndex {
 
         Document document = getDocument(file);
 
-        System.out.print("Does the file exists in the index? ");
-        if (!articleID.contains(file.getName()))
-        {
-            System.out.println(articleID.contains(file.getName()));
-            articleID.add(file.getName());
-            System.out.println("Indexing " + file.getCanonicalPath());
-            writer.addDocument(document);
-        }else {
-            System.out.println(articleID.contains(file.getName()));
+
+        if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND) {
+            if (!isAlreadyIndexed(document)) {
+                System.out.println("Indexing " + file.getCanonicalPath());
+                writer.addDocument(document);
+            } else {
+                System.out.println("Replacing file : " + file.getCanonicalPath());
+                deletingFiles(file.getCanonicalPath());
+                writer.addDocument(document);
+
+            }
         }
-
-
-        //TODO edw prepei na valw check gia ta fields. Prepei prwta na parw to document
-        //writer.addDocument(document);
 
     }
 
@@ -133,7 +147,7 @@ public class TReSaIndex {
         {
             String result = currentLine.toLowerCase(Locale.ROOT);
 
-            prep = new Preprocessor(currentLine);
+            prep = new Preprocessor(result);
 
             if (result.contains("title")) {
                 document.add(new Field(TReSaFields.TITLE, prep.toString(), TextField.TYPE_STORED));
@@ -142,25 +156,25 @@ public class TReSaIndex {
             } else if (result.contains("people")) {
                 //result = result.replaceAll("people"," ");
                 document.add(new Field(TReSaFields.PEOPLE, prep.toString(), TextField.TYPE_STORED));
-            } else if (result.contains("body")){
+            } else {
                 document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
             }
             //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
         }
 
+        document.add(new Field(TReSaFields.FILENAME,file.getName(),StringField.TYPE_STORED));
+
         articleReader.close();
         return document;
     }
 
-    //DELE
+
     public void deletingFiles(String fileName) throws IOException, NoSuchAlgorithmException {
         File file = new File(fileName);
-        System.out.println("Deleting from Index file: " + file.getCanonicalPath());
         deleteDoc(file);
-        close();
     }
 
-    //DELE
+
     private void deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
         Document doc = getDocument(file);
         Term contentTerm = new Term(TReSaFields.BODY,doc.get(TReSaFields.BODY));
@@ -168,17 +182,47 @@ public class TReSaIndex {
         Term placesTerm = new Term(TReSaFields.PLACES,doc.get(TReSaFields.PLACES));
         Term peopleTerm = new Term(TReSaFields.PEOPLE,doc.get(TReSaFields.PEOPLE));
 
-        System.out.println(peopleTerm.toString());
-        System.out.println(contentTerm);
-
         writer.deleteDocuments(contentTerm);
         writer.deleteDocuments(titleTerm);
         writer.deleteDocuments(placesTerm);
         writer.deleteDocuments(peopleTerm);
 
         //writer.commit();
-        writer.forceMergeDeletes();
-        writer.close();
+        //writer.forceMergeDeletes();
+
+        //writer.close();
 
     }
+
+    private boolean isAlreadyIndexed(Document document) throws IOException {
+        // Prwto check gia file name
+
+        Path path = Paths.get(indexDir);
+        Directory index = FSDirectory.open(path);
+        if (!DirectoryReader.indexExists(index))
+        {
+            return false;
+        }
+        TermQuery query1 = new TermQuery(new Term(TReSaFields.FILENAME,document.get(TReSaFields.FILENAME)));
+        BooleanQuery matchingQuery = new BooleanQuery.Builder()
+                .add(query1,BooleanClause.Occur.SHOULD)
+                .build();
+
+
+        IndexReader r = DirectoryReader.open(index);
+        searcher = new IndexSearcher(r);
+        TopDocs results = searcher.search(matchingQuery,1);
+
+        if (results.totalHits.value == 0){
+            r.close();
+            return false;
+
+        }
+        r.close();
+        return true;
+
+    }
+
+
+
 }

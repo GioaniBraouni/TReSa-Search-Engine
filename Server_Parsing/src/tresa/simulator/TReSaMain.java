@@ -8,23 +8,24 @@ import java.util.Scanner;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 
 // Added 8.0.0
 
 public class TReSaMain {
     String indexDir = "Index"; // REDO
-    String dataDir = "Server_Parsing/Reuters";
+    String dataDir = "Reuters";
     QuerySearch querySearch;
-    static TReSaIndex sec;
-
-    {
-        try {
-            sec = new TReSaIndex(indexDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    TReSaIndex sec;
+//
+//    {
+//        try {
+//            sec = new TReSaIndex(indexDir);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public static void main(String[] args) {
         Server server = new Server();
@@ -63,7 +64,8 @@ public class TReSaMain {
 
             }else if(selection == 3){ // Add Single File
                 //System.out.println("Name of file");
-                String selectedFile = server.complete;
+                //String selectedFile = server.complete;
+                String selectedFile = scanner.nextLine();
                 try {
                     tester.singleFile(selectedFile);
                 }catch (IOException | ParseException | NoSuchAlgorithmException e){
@@ -115,26 +117,29 @@ public class TReSaMain {
                 }
 
             }
-            else
-            {
-                try {
-                    sec.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+//            else
+//            {
+//                try {
+//                    sec.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
         }
 
 
     }
     private void createIndex() throws IOException, ParseException, NoSuchAlgorithmException {
+        sec = new TReSaIndex(indexDir);
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(dataDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
+        sec.close();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
+
     }
 
     //TODO MERGE createIndex && createOneIndex AT THE END
@@ -148,6 +153,7 @@ public class TReSaMain {
         sec.close();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
+
     }
 
     protected void singleFile(String selectedFile) throws IOException, ParseException, NoSuchAlgorithmException {
@@ -159,6 +165,7 @@ public class TReSaMain {
         sec.close();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
+
     }
 
 
@@ -179,7 +186,7 @@ public class TReSaMain {
                 Document doc;
                 try {
                     doc = indexSearcher.doc(docIndex);
-                    String filepath = doc.get("filepath");
+                    String filepath = doc.get("fileName");
                     File file = new File(filepath);
                     String filename = file.getName();
                     System.out.println("Document Name: " + filename);
