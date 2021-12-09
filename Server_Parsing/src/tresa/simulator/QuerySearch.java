@@ -59,6 +59,7 @@ public class QuerySearch {
         Query searchQuery = queryParser.parse(prep.toString());
         System.out.println(searchQuery);
         TReSaMain.query = searchQuery;
+        indexSearcher.setSimilarity(new ClassicSimilarity());
         indexSearcher.search(searchQuery, docCollector);
         searchResults = docCollector.topDocs().scoreDocs;
 

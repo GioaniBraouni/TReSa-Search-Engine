@@ -1,74 +1,31 @@
 package tresa.simulator;
 
 
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.*;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.*;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 
 
 public class TReSaIndex {
-    private IndexWriter writer;
     IndexSearcher searcher;
     String indexDir = "Index";
-    QueryParser queryParser;
     HashSet<String> articleID = new HashSet<>();
 
-    /*
-    TODO FOR INDEX WRITER
-    In either case, documents are added with addDocument and removed with deleteDocuments(Term...) or deleteDocuments(Query...).
-    A document can be updated with updateDocument (which just deletes and then adds the entire document).
-    When finished adding, deleting and updating documents, close should be called.
-     */
-    public TReSaIndex(String indexDirectoryPath) throws IOException {
-        //this directory will contain the indexes
-        Path indexPath = Paths.get(indexDirectoryPath);
-        if (!Files.exists(indexPath)) {
-            Files.createDirectory(indexPath);
-        }
-
-        Directory indexDirectory = FSDirectory.open(indexPath);
-
-
-        List<String> stopWords = List.of("places","people","title","body","reuter");
-
-        CharArraySet stopSet = new CharArraySet(stopWords,true);
-
-        CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
-
-        stopSet.addAll(enStopSet);
-
-        IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
-
-        writer = new IndexWriter(indexDirectory, config); // The IndexWriterConfig.OpenMode option on IndexWriterConfig.setOpenMode(OpenMode) determines whether a new index is created, or whether an existing index is opened.
-    }
-
-
-
-    public void close() throws IOException {
-        writer.close();
+    public void commit() throws IOException {
+        TReSaMain.writer.commit();
     }
 
     public int createIndex(String dataDirPath, FileFilter filter) throws
-            IOException, ParseException, NoSuchAlgorithmException {
+            IOException, NoSuchAlgorithmException {
         //get all files in the data directory
         File[] files = new File(dataDirPath).listFiles();
         for (File file : files) {
@@ -81,12 +38,12 @@ public class TReSaIndex {
                 indexFile(file);
             }
         }
-        return writer.numRamDocs();
+        return TReSaMain.writer.numRamDocs();
     }
 
 
     public int createSingleIndex(String fileName, FileFilter filter) throws
-            IOException, ParseException, NoSuchAlgorithmException {
+            IOException,  NoSuchAlgorithmException {
         //get all files in the data directory
         File files = new File(fileName);
 
@@ -98,33 +55,41 @@ public class TReSaIndex {
             indexFile(files);
         }
 
-        return writer.numRamDocs();
+        return TReSaMain.writer.numRamDocs();
     }
 
 
-    private void indexFile(File file) throws IOException, NoSuchAlgorithmException {
-        Path path = Paths.get(indexDir);
-        File dir = new File(indexDir);
-
+    private void indexFile(File file) throws IOException, NoSuchAlgorithmException
+    {
         Document document = getDocument(file);
 
-
-        if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND) {
-            if (!isAlreadyIndexed(document)) {
+        if (TReSaMain.writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND) {
+            if (!TReSaMain.initialIndex) {
                 System.out.println("Indexing " + file.getCanonicalPath());
-                writer.addDocument(document);
-            } else {
-                System.out.println("Replacing file : " + file.getCanonicalPath());
-                deletingFiles(file.getCanonicalPath());
-                writer.addDocument(document);
-
+                TReSaMain.hashSet.add(file.getName());
+                TReSaMain.writer.addDocument(document);
+            }
+            else
+            {
+                //Υποθετουμε οτι για την τροποποιηση πρεπει να διαγραψουμε το κειμενο και να το ξανακανουμε add
+                //Επισης οταν κανουμε add πρεπει να ενημερωσουμε το hashset και να ενημερωσουμε index
+                //Επισης οταν κανουμε delete τα βηματα ειναι ιδια
+                if(TReSaMain.hashSet.contains(file.getName()))
+                    System.out.println("File " +file.getName()+ " exists");
+                else
+                {
+                    TReSaMain.hashSet.add(file.getName());
+                    System.out.println("Adding: " + file.getCanonicalPath());
+                    TReSaMain.writer.addDocument(document);
+                }
+                //deletingFiles(file.getCanonicalPath());
             }
         }
 
     }
 
-    protected Document getDocument(File file) throws IOException, NoSuchAlgorithmException {
-
+    protected Document getDocument(File file) throws IOException
+    {
         Document document = new Document();
         //index file contents
         BufferedReader articleReader = new BufferedReader(new FileReader(file));
@@ -172,48 +137,11 @@ public class TReSaIndex {
         Term peopleTerm = new Term(TReSaFields.PEOPLE,doc.get(TReSaFields.PEOPLE));
         Term fileTerm = new Term(TReSaFields.FILENAME,doc.get(TReSaFields.FILENAME));
 
-        writer.deleteDocuments(fileTerm);
-        writer.deleteDocuments(contentTerm);
-        writer.deleteDocuments(titleTerm);
-        writer.deleteDocuments(placesTerm);
-        writer.deleteDocuments(peopleTerm);
-
-        //writer.commit();
-        //writer.forceMergeDeletes();
-
-        //writer.close();
+        TReSaMain.writer.deleteDocuments(fileTerm);
+        TReSaMain.writer.deleteDocuments(contentTerm);
+        TReSaMain.writer.deleteDocuments(titleTerm);
+        TReSaMain.writer.deleteDocuments(placesTerm);
+        TReSaMain.writer.deleteDocuments(peopleTerm);
 
     }
-
-    private boolean isAlreadyIndexed(Document document) throws IOException {
-        // Prwto check gia file name
-
-        Path path = Paths.get(indexDir);
-        Directory index = FSDirectory.open(path);
-        if (!DirectoryReader.indexExists(index))
-        {
-            return false;
-        }
-        TermQuery query1 = new TermQuery(new Term(TReSaFields.FILENAME,document.get(TReSaFields.FILENAME)));
-        BooleanQuery matchingQuery = new BooleanQuery.Builder()
-                .add(query1,BooleanClause.Occur.SHOULD)
-                .build();
-
-
-        IndexReader r = DirectoryReader.open(index);
-        searcher = new IndexSearcher(r);
-        TopDocs results = searcher.search(matchingQuery,1);
-
-        if (results.totalHits.value == 0){
-            r.close();
-            return false;
-
-        }
-        r.close();
-        return true;
-
-    }
-
-
-
 }

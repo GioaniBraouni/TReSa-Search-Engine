@@ -1,16 +1,27 @@
 package tresa.simulator;
 
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.highlight.*;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -18,9 +29,11 @@ import java.util.Scanner;
 // Added 8.0.0
 
 public class TReSaMain {
-    String indexDir = "Index"; // REDO
+    static String indexDir = "Index"; // REDO
     String dataDir = "Server_Parsing/Reuters";
-    QuerySearch querySearch;
+    public static HashSet<String> hashSet= new HashSet<String>();
+    public static boolean initialIndex = false;
+    public static IndexWriter writer;
     TReSaIndex sec;
     public static Query query;
 
@@ -30,6 +43,12 @@ public class TReSaMain {
         TReSaMain tester = new TReSaMain();
         Scanner scanner = new Scanner(System.in);
 
+        try {
+            initialiseIndexWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         while (true){
             int selection;
             System.out.println("Add reuters(1)");
@@ -37,7 +56,7 @@ public class TReSaMain {
             System.out.println("Add a single article(3)");
             System.out.println("Delete a article(4)");
             System.out.println("Enter a query(5)");
-            System.out.println("Quit(7)");
+            System.out.println("Quit(6)");
             System.out.println("Enter Choice");
             selection = scanner.nextInt();
             scanner.nextLine();
@@ -45,7 +64,7 @@ public class TReSaMain {
                 try {
                     //tester = new LuceneTester();
                     tester.createIndex();
-
+                    initialIndex=true;
                 } catch (IOException | ParseException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
@@ -97,19 +116,48 @@ public class TReSaMain {
                 {
                     e.printStackTrace();
                 }
-
+            }
+            else if(selection == 6)
+            {
+                try {
+                    writer.close();
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
 
     }
+    private static void initialiseIndexWriter() throws IOException {
+        Path indexPath = Paths.get(indexDir);
+        if (!Files.exists(indexPath)) {
+            Files.createDirectory(indexPath);
+        }
+
+        Directory indexDirectory = FSDirectory.open(indexPath);
+
+
+        List<String> stopWords = List.of("places","people","title","body","reuter");
+
+        CharArraySet stopSet = new CharArraySet(stopWords,true);
+
+        CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
+
+        stopSet.addAll(enStopSet);
+
+        IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
+
+        writer = new IndexWriter(indexDirectory, config);
+    }
     private void createIndex() throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(dataDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
+        sec.commit();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
 
@@ -118,24 +166,24 @@ public class TReSaMain {
     //TODO MERGE createIndex && createOneIndex AT THE END
 
     protected void createOneIndex(String selectedDir) throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(selectedDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
+        sec.commit();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
 
     }
 
     protected void singleFile(String selectedFile) throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createSingleIndex(selectedFile, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
+        sec.commit();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
 
@@ -144,9 +192,9 @@ public class TReSaMain {
 
     private void testFileToDelete(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         sec.deletingFiles(deleteFile);
-        sec.close();
+        sec.commit();
     }
 
     protected static String printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
