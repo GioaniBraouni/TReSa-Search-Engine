@@ -3,13 +3,21 @@ package tresa.simulator;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.logging.SimpleFormatter;
 
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.highlight.*;
+
 
 // Added 8.0.0
 
@@ -18,14 +26,7 @@ public class TReSaMain {
     String dataDir = "Reuters";
     QuerySearch querySearch;
     TReSaIndex sec;
-//
-//    {
-//        try {
-//            sec = new TReSaIndex(indexDir);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static Query query;
 
     public static void main(String[] args) {
         Server server = new Server();
@@ -53,7 +54,7 @@ public class TReSaMain {
                     e.printStackTrace();
                 }
             }else if(selection == 2){ // Add folder
-                //System.out.println("Name of dir");
+
                 String selectedDir = scanner.next();
                 try {
                     tester.createOneIndex(selectedDir);
@@ -176,28 +177,80 @@ public class TReSaMain {
         sec.close();
     }
 
-    private static void printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
+    protected static String printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
+
+        // TODO NOT COMPLETE YET NEED TO GET ALL FIELDS NOT ONLY ONE
+        StringBuilder result = new StringBuilder(" ");
+
+        SimpleHTMLFormatter formatter = new SimpleHTMLFormatter();
+
+        //It scores text fragments by the number of unique query terms found
+        //Basically the matching score in layman terms
+        QueryScorer scorer = new QueryScorer(query);
+
+        //used to markup highlighted terms found in the best sections of a text
+        Highlighter highlighter = new Highlighter(formatter, scorer);
+
+        //It breaks text up into same-size texts but does not split up spans
+        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 200);
+
+        //breaks text up into same-size fragments with no concerns over spotting sentence boundaries.
+        //Fragmenter fragmenter = new SimpleFragmenter(10);
+
+        //set fragmenter to highlighter
+        highlighter.setTextFragmenter(fragmenter);
         if (searchResults != null && searchResults.length > 0)
         {
+
             System.out.println(searchResults.length + " documents found");
+            result = new StringBuilder(searchResults.length + " document found");
             for (int i = 0; i < searchResults.length; i++)
             {
                 int docIndex = searchResults[i].doc;
                 Document doc;
                 try {
+
                     doc = indexSearcher.doc(docIndex);
                     String filepath = doc.get("fileName");
                     File file = new File(filepath);
                     String filename = file.getName();
                     System.out.println("Document Name: " + filename);
+                    //result.append("Document Name: ").append(filename);
                     System.out.println("Rank: " + (i + 1));
+                    //result.append("Rank: ").append(i+1);
                     System.out.println("Path: " + filepath);
+                    //result.append("PAth: ").append(filepath);
                     System.out.println("Relevance Score: " + searchResults[i].score);
+                    //result.append("Relevance Score: " ).append(searchResults[i].score);
+                    result.append(" Document Name: ").append(" Rank: ").append(i+1).append(" ").append(filename).append(" ")
+                            .append(searchResults[i].score).append(doc.get("title"));
+//                    Query query = new QueryParser.
+                    //System.out.println(indexSearcher.explain(TReSaMain.query, docIndex));
+                    //String field = String.valueOf(indexSearcher.explain(TReSaMain.query, docIndex));
+
+                    String[] frags = highlighter.getBestFragments(new StandardAnalyzer(),"title,body",doc.get(TReSaFields.BODY),10);
+                    for (String frag : frags)
+                    {
+                        System.out.println("=======================");
+                        System.out.println(frag);
+                    }
+                    //System.out.println(doc.);
                 } catch (IOException e) {
                     System.out.println("Document with id - " + docIndex + " no longer exists");
+                    result.append("Document with id - ").append(docIndex).append(" no longer exists");
+                } catch (InvalidTokenOffsetsException e) {
+                    e.printStackTrace();
                 }
             }
-        } else
+        } else {
             System.out.println("No documents found for the query: " + searchQuery);
+            result.append("No documents found for the query: ").append(searchQuery);
+        }
+        if (result.toString() == null){
+            return "No docs";
+        }
+        return result.toString();
     }
+
+
 }

@@ -8,6 +8,8 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
+import org.apache.lucene.search.similarities.TFIDFSimilarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -25,10 +27,12 @@ public class QuerySearch {
 
     public QuerySearch() throws IOException
     {
+
         Path indexPath = Paths.get("Index");
         indexDirectory = FSDirectory.open(indexPath);
         indexReader = DirectoryReader.open(indexDirectory);
         indexSearcher = new IndexSearcher(indexReader);
+        indexSearcher.setSimilarity(new ClassicSimilarity());
     }
 
     //public BooleanQueryParser(String )
@@ -39,7 +43,6 @@ public class QuerySearch {
         TopScoreDocCollector docCollector =  TopScoreDocCollector.create(10000, 20000);
         ScoreDoc[] searchResults = null;
 
-
         analyzer = new StandardAnalyzer();
         MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
                 analyzer);
@@ -47,7 +50,7 @@ public class QuerySearch {
         Preprocessor prep = new Preprocessor(query);
         System.out.println("Searching for '" + prep.toString() + "' using QueryParser");
         Query searchQuery = queryParser.parse(prep.toString());
-
+        TReSaMain.query = searchQuery;
         indexSearcher.search(searchQuery, docCollector);
         searchResults = docCollector.topDocs().scoreDocs;
 

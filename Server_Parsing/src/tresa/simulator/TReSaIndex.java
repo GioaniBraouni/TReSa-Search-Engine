@@ -135,7 +135,6 @@ public class TReSaIndex {
 
     protected Document getDocument(File file) throws IOException, NoSuchAlgorithmException {
 
-
         Document document = new Document();
         //index file contents
         BufferedReader articleReader = new BufferedReader(new FileReader(file));
@@ -181,7 +180,9 @@ public class TReSaIndex {
         Term titleTerm = new Term(TReSaFields.TITLE,doc.get(TReSaFields.TITLE));
         Term placesTerm = new Term(TReSaFields.PLACES,doc.get(TReSaFields.PLACES));
         Term peopleTerm = new Term(TReSaFields.PEOPLE,doc.get(TReSaFields.PEOPLE));
+        Term fileTerm = new Term(TReSaFields.FILENAME,doc.get(TReSaFields.FILENAME));
 
+        writer.deleteDocuments(fileTerm);
         writer.deleteDocuments(contentTerm);
         writer.deleteDocuments(titleTerm);
         writer.deleteDocuments(placesTerm);

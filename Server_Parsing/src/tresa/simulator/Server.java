@@ -1,8 +1,10 @@
 package tresa.simulator;
 
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.ScoreDoc;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
@@ -11,18 +13,19 @@ import java.util.Scanner;
 public class Server extends Thread {
     public String complete = "";
     public static int ended = 0;
+    TReSaMain main;
 
 
 
 
     @Override
     public void run() {
-
         try (ServerSocket serverSocket = new ServerSocket(5555)) {
 
             while (true) {
                 Socket client = serverSocket.accept();
                 Scanner fromClient = new Scanner(client.getInputStream());
+                PrintWriter toClient = new PrintWriter(client.getOutputStream(),true);
 
                 while (fromClient.hasNextLine()) {
                     String clientString = fromClient.nextLine();
@@ -54,6 +57,14 @@ public class Server extends Thread {
                                 e.printStackTrace();
                             }
                             this.complete = "";
+                        }else {
+
+                            //System.out.println(queryInput);
+                            QuerySearch docQuerySearch = new QuerySearch();
+                            ScoreDoc[] searchResults = docQuerySearch.search(this.complete);
+                            toClient.println(TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher()));
+                            docQuerySearch.closeReader();
+
                         }
 
 //                        System.out.println(this.complete);
@@ -61,7 +72,7 @@ public class Server extends Thread {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
