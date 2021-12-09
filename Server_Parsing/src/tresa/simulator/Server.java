@@ -61,7 +61,7 @@ public class Server extends Thread {
 
                             //System.out.println(queryInput);
                             QuerySearch docQuerySearch = new QuerySearch();
-                            ScoreDoc[] searchResults = docQuerySearch.search(this.complete);
+                            ScoreDoc[] searchResults = docQuerySearch.search(this.complete,"100");
                             toClient.println(TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher()));
                             docQuerySearch.closeReader();
 

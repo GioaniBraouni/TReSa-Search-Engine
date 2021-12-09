@@ -1,29 +1,25 @@
 package tresa.simulator;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.logging.SimpleFormatter;
-
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.highlight.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Scanner;
+
 
 
 // Added 8.0.0
 
 public class TReSaMain {
     String indexDir = "Index"; // REDO
-    String dataDir = "Reuters";
+    String dataDir = "Server_Parsing/Reuters";
     QuerySearch querySearch;
     TReSaIndex sec;
     public static Query query;
@@ -88,10 +84,12 @@ public class TReSaMain {
             {
                 try
                 {
+                    System.out.println("Enter query");
                     String queryInput = scanner.nextLine();
-                    //System.out.println(queryInput);
+                    System.out.println("Specify max hits(null for 0)");
                     QuerySearch docQuerySearch = new QuerySearch();
-                    ScoreDoc[] searchResults = docQuerySearch.search(queryInput);
+                    String userInput = scanner.nextLine();
+                    ScoreDoc[] searchResults = docQuerySearch.search(queryInput,userInput);
                     printSearchResults(searchResults,queryInput, docQuerySearch.getIndexSearcher());
                     docQuerySearch.closeReader();
 
@@ -100,33 +98,7 @@ public class TReSaMain {
                     e.printStackTrace();
                 }
 
-            }else if(selection == 6) //BooleanQuery search
-            {
-                try
-                {
-                    String queryInput = scanner.nextLine();
-                    String queryInput2 = scanner.nextLine();
-                    //System.out.println(queryInput);
-                    QuerySearch docSearcher = new QuerySearch();
-                    ScoreDoc[] searchResults = docSearcher.testSearch(queryInput,queryInput2);
-                    printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
-                    docSearcher.closeReader();
-
-                } catch (IOException | ParseException e)
-                {
-                    e.printStackTrace();
-                }
-
             }
-//            else
-//            {
-//                try {
-//                    sec.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-
         }
 
 

@@ -1,28 +1,28 @@
 package tresa.simulator;
 
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-
-import org.apache.lucene.analysis.*;
-
-import org.apache.lucene.analysis.core.StopFilterFactory;
-import org.apache.lucene.analysis.custom.CustomAnalyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.synonym.SynonymFilterFactory;
-import org.apache.lucene.document.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 
 
 public class TReSaIndex {
@@ -55,16 +55,6 @@ public class TReSaIndex {
         CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
 
         stopSet.addAll(enStopSet);
-
-//        Analyzer custom = CustomAnalyzer.builder()
-//                .withTokenizer("standard")
-//                .addTokenFilter("lowercase")
-//                .addTokenFilter("stop")
-//                .whenTerm(t -> t.toString().contains(".") || t.toString().contains(","))
-//                .addTokenFilter("keepword")
-//                .addTokenFilter("stemmeroverride")
-//                .endwhen()
-//                .build();
 
         IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
 
