@@ -3,9 +3,8 @@ package tresa.simulator;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.Formatter;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.logging.SimpleFormatter;
 
 import org.apache.lucene.analysis.TokenStream;
@@ -170,14 +169,39 @@ public class TReSaMain {
     }
 
 
-    private void testFileToDelete(String deleteFile) throws IOException, NoSuchAlgorithmException {
+    protected void testFileToDelete(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
         sec = new TReSaIndex(indexDir);
         sec.deletingFiles(deleteFile);
         sec.close();
     }
 
-    protected static String printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
+    protected void folderDeletion(String deleteFile) throws IOException, NoSuchAlgorithmException, ParseException {
+        File file = new File(deleteFile);
+        sec = new TReSaIndex(indexDir);
+        sec.deleteFolderFromIndex(deleteFile,new TextFileFilter());
+        sec.close();
+    }
+
+    protected void deleteSingleFileFromUI(String deleteFile) throws IOException, NoSuchAlgorithmException {
+        File file = new File(deleteFile);
+        sec = new TReSaIndex(indexDir);
+        sec.fromUI(deleteFile);
+        sec.close();
+    }
+
+    private static String simplePrint(String[] arr){
+        for (String frag : arr)
+        {
+
+            System.out.println("=======================");
+            System.out.println(frag);
+            return frag;
+        }
+        return null;
+    }
+
+    protected static HashMap<String,String> printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
 
         // TODO NOT COMPLETE YET NEED TO GET ALL FIELDS NOT ONLY ONE
         StringBuilder result = new StringBuilder(" ");
@@ -192,13 +216,16 @@ public class TReSaMain {
         Highlighter highlighter = new Highlighter(formatter, scorer);
 
         //It breaks text up into same-size texts but does not split up spans
-        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 200);
+        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 15);
 
         //breaks text up into same-size fragments with no concerns over spotting sentence boundaries.
         //Fragmenter fragmenter = new SimpleFragmenter(10);
 
         //set fragmenter to highlighter
         highlighter.setTextFragmenter(fragmenter);
+        StringBuilder toReturn = new StringBuilder();
+        HashMap<String,String> mapped = new HashMap<>();
+
         if (searchResults != null && searchResults.length > 0)
         {
 
@@ -209,7 +236,6 @@ public class TReSaMain {
                 int docIndex = searchResults[i].doc;
                 Document doc;
                 try {
-
                     doc = indexSearcher.doc(docIndex);
                     String filepath = doc.get("fileName");
                     File file = new File(filepath);
@@ -224,17 +250,43 @@ public class TReSaMain {
                     //result.append("Relevance Score: " ).append(searchResults[i].score);
                     result.append(" Document Name: ").append(" Rank: ").append(i+1).append(" ").append(filename).append(" ")
                             .append(searchResults[i].score).append(doc.get("title"));
-//                    Query query = new QueryParser.
-                    //System.out.println(indexSearcher.explain(TReSaMain.query, docIndex));
-                    //String field = String.valueOf(indexSearcher.explain(TReSaMain.query, docIndex));
 
-                    String[] frags = highlighter.getBestFragments(new StandardAnalyzer(),"title,body",doc.get(TReSaFields.BODY),10);
-                    for (String frag : frags)
-                    {
-                        System.out.println("=======================");
-                        System.out.println(frag);
+
+                    String body;
+                    String title;
+                    String places;
+                    String people;
+
+
+                    String[] fragsBody = highlighter.getBestFragments(new StandardAnalyzer(),"body",doc.get(TReSaFields.BODY),10);
+                    //toReturn = simplePrint(frags);
+                    //toReturn.append(simplePrint(frags));
+                    body = simplePrint(fragsBody);
+
+                    String[] fragsTitle = highlighter.getBestFragments(new StandardAnalyzer(),"title",doc.get(TReSaFields.TITLE),10);
+                    //toReturn = simplePrint(frags);
+                    //toReturn.append(simplePrint(frags));
+                    title = simplePrint(fragsTitle);
+
+                    String[] fragsPlaces = highlighter.getBestFragments(new StandardAnalyzer(),"places",doc.get(TReSaFields.PLACES),10);
+                    //toReturn = simplePrint(frags);
+                    //toReturn.append(simplePrint(frags));
+                    places = simplePrint(fragsPlaces);
+
+                    String[] fragsPeople = highlighter.getBestFragments(new StandardAnalyzer(),"people",doc.get(TReSaFields.PEOPLE),10);
+                    //toReturn = simplePrint(frags);
+                    //toReturn.append(simplePrint(frags));
+                    people = simplePrint(fragsPeople);
+
+                    String[] allStrings = {body,title,places,people};
+
+                    for (String s : allStrings){
+                        if (s!=null){
+                            mapped.put(filename,s + " " + searchResults[i].score);
+                        }
                     }
-                    //System.out.println(doc.);
+
+
                 } catch (IOException e) {
                     System.out.println("Document with id - " + docIndex + " no longer exists");
                     result.append("Document with id - ").append(docIndex).append(" no longer exists");
@@ -246,11 +298,14 @@ public class TReSaMain {
             System.out.println("No documents found for the query: " + searchQuery);
             result.append("No documents found for the query: ").append(searchQuery);
         }
-        if (result.toString() == null){
-            return "No docs";
+
+        for (Map.Entry<String,String> entry : mapped.entrySet()){
+            System.out.println(entry.getKey() + " " + entry.getValue());
         }
-        return result.toString();
+        return mapped;
     }
+
+
 
 
 }

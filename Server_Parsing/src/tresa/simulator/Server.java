@@ -8,6 +8,9 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Server extends Thread {
@@ -41,7 +44,7 @@ public class Server extends Thread {
                             System.out.println("Name of file");
                             String selectedFile = this.complete;
                             try {
-                                tester.singleFile(selectedFile);
+                                tester.createOneIndex(selectedFile);
                             } catch (IOException | ParseException | NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }
@@ -57,18 +60,49 @@ public class Server extends Thread {
                                 e.printStackTrace();
                             }
                             this.complete = "";
-                        }else {
+                        }else if(this.complete.contains("#()")){
+                            this.complete = this.complete.substring(3);
+                            TReSaMain tester = new TReSaMain();
+                            //System.out.println("Name of file");
+                            String selectedFile = this.complete;
+                            try {
+                                tester.deleteSingleFileFromUI(selectedFile);
+                            } catch (IOException | NoSuchAlgorithmException e) {
+                                e.printStackTrace();
+                            }
+                            this.complete = "";
+                        }else if (this.complete.contains("@-!")){
+                            this.complete = this.complete.substring(3);
+                            TReSaMain tester = new TReSaMain();
+                            String selectedFile = this.complete;
+                            try {
+                                tester.folderDeletion(selectedFile);
+                            } catch (IOException | NoSuchAlgorithmException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
 
                             //System.out.println(queryInput);
                             QuerySearch docQuerySearch = new QuerySearch();
                             ScoreDoc[] searchResults = docQuerySearch.search(this.complete);
-                            toClient.println(TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher()));
+                            HashMap<String,String> sendToClient = new HashMap<>();
+                            sendToClient = TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher());
+                            //toClient.println(TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher()));
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (Map.Entry<String,String> entry : sendToClient.entrySet()){
+                                stringBuilder.append(entry.getKey()).append("\t").append("      ").append(entry.getValue()).append("\t");
+                                System.out.println((entry.getKey() + " " + entry.getValue() + "\t"));
+                            }
+                            toClient.println(stringBuilder.toString());
                             docQuerySearch.closeReader();
 
                         }
 
 //                        System.out.println(this.complete);
 
+                    }else {
+                        toClient.println(" Empty Input");
                     }
                 }
             }

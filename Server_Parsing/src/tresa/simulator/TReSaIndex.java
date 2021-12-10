@@ -77,6 +77,23 @@ public class TReSaIndex {
         writer.close();
     }
 
+    public int deleteFolderFromIndex(String dataDirPath, FileFilter filter) throws
+            IOException, ParseException, NoSuchAlgorithmException {
+        //get all files in the data directory
+        File[] files = new File(dataDirPath).listFiles();
+        for (File file : files) {
+            if (!file.isDirectory()
+                    && !file.isHidden()
+                    && file.exists()
+                    && file.canRead()
+                    && filter.accept(file)
+            ) {
+                fromUI(file.toString());
+            }
+        }
+        return writer.numRamDocs();
+    }
+
     public int createIndex(String dataDirPath, FileFilter filter) throws
             IOException, ParseException, NoSuchAlgorithmException {
         //get all files in the data directory
@@ -141,6 +158,8 @@ public class TReSaIndex {
 
         Preprocessor prep;
 
+        StringBuilder stringBuilder = new StringBuilder();
+
         String currentLine; // If line contains <TITLE> give more weight. (IDEA)
         while ((currentLine = articleReader.readLine()) != null)
         {
@@ -156,11 +175,13 @@ public class TReSaIndex {
                 //result = result.replaceAll("people"," ");
                 document.add(new Field(TReSaFields.PEOPLE, prep.toString(), TextField.TYPE_STORED));
             } else {
-                document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
+                assert stringBuilder != null;
+                stringBuilder.append(prep.toString());
+                //document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
             }
             //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
         }
-
+        document.add(new Field(TReSaFields.BODY, stringBuilder.toString(), TextField.TYPE_STORED));
         document.add(new Field(TReSaFields.FILENAME,file.getName(),StringField.TYPE_STORED));
 
         articleReader.close();
@@ -170,6 +191,12 @@ public class TReSaIndex {
 
     public void deletingFiles(String fileName) throws IOException, NoSuchAlgorithmException {
         File file = new File(fileName);
+        deleteDoc(file);
+    }
+
+    public void fromUI(String fileName) throws IOException, NoSuchAlgorithmException {
+        File file = new File(fileName);
+        System.out.println("Deleting: " + fileName);
         deleteDoc(file);
     }
 
