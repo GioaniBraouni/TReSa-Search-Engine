@@ -4,6 +4,8 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -44,12 +46,12 @@ public class Server extends Thread {
                             System.out.println("Name of file");
                             String selectedFile = this.complete;
                             try {
-                                tester.createOneIndex(selectedFile);
-                            } catch (IOException | ParseException | NoSuchAlgorithmException e) {
+                                tester.singleFile(selectedFile);
+                            } catch (IOException | ParseException | NoSuchAlgorithmException | NullPointerException e) {
                                 e.printStackTrace();
                             }
                             this.complete = "";
-                        }else if (this.complete.contains("!@#")){
+                        }else if (this.complete.contains("6^7")){
                             this.complete = this.complete.substring(3);
                             TReSaMain tester = new TReSaMain();
                             //System.out.println("Name of file");
@@ -86,15 +88,24 @@ public class Server extends Thread {
                             //System.out.println(queryInput);
                             QuerySearch docQuerySearch = new QuerySearch();
                             ScoreDoc[] searchResults = docQuerySearch.search(this.complete);
-                            HashMap<String,String> sendToClient = new HashMap<>();
+                            HashMap<String,HashMap<String,Float>> sendToClient = new HashMap<>();
                             sendToClient = TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher());
-                            //toClient.println(TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher()));
+
                             StringBuilder stringBuilder = new StringBuilder();
-                            for (Map.Entry<String,String> entry : sendToClient.entrySet()){
-                                stringBuilder.append(entry.getKey()).append("\t").append("      ").append(entry.getValue()).append("\t");
-                                System.out.println((entry.getKey() + " " + entry.getValue() + "\t"));
+
+                            try{
+                                final OutputStream out = client.getOutputStream();
+                                final ObjectOutputStream map = new ObjectOutputStream(out);
+                                map.writeObject(sendToClient);
+                                out.close();
+                            }catch (IOException e){
+                                e.printStackTrace();
                             }
-                            toClient.println(stringBuilder.toString());
+
+
+
+
+//                            toClient.println(stringBuilder.toString());
                             docQuerySearch.closeReader();
 
                         }

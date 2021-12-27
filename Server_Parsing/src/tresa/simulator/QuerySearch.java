@@ -3,8 +3,12 @@ package tresa.simulator;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.*;
@@ -35,19 +39,24 @@ public class QuerySearch {
         indexSearcher.setSimilarity(new ClassicSimilarity());
     }
 
-    //public BooleanQueryParser(String )
 
     public ScoreDoc[] search(String query) throws IOException,
             ParseException
     {
         TopScoreDocCollector docCollector =  TopScoreDocCollector.create(10000, 20000);
         ScoreDoc[] searchResults = null;
+        Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
+        analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer());
+        analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer());
+        analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer());
+        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(), analyzerMap);
+//        analyzer = new StandardAnalyzer();
 
-        analyzer = new StandardAnalyzer();
         MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
-                analyzer);
+                wrapper);
 
-        Preprocessor prep = new Preprocessor(query);
+        //Preprocessor prep = new Preprocessor(query);
+        String prep = query.toString();
         System.out.println("Searching for '" + prep.toString() + "' using QueryParser");
         Query searchQuery = queryParser.parse(prep.toString());
         TReSaMain.query = searchQuery;
@@ -55,52 +64,6 @@ public class QuerySearch {
         searchResults = docCollector.topDocs().scoreDocs;
 
         return searchResults;
-    }
-
-
-    public ScoreDoc[] testSearch(String input,String input1) throws IOException,
-            ParseException
-    //TODO more work to be done. Seems to work
-    {
-        TopScoreDocCollector docCollector =  TopScoreDocCollector.create(10000, 20000);
-        ScoreDoc[] searchResults = null;
-
-
-        analyzer = new StandardAnalyzer();
-        MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
-                analyzer);
-        queryParser.setDefaultOperator(QueryParser.OR_OPERATOR);
-        TermQuery query1 = new TermQuery(new Term(TReSaFields.BODY,input));
-        TermQuery query2 = new TermQuery(new Term(TReSaFields.BODY,input1));
-        Query searx = queryParser.parse("body:" + input + " NOT body:" +  input1);
-
-        // prep = new Preprocessor(query);
-        //System.out.println("Searching for '" + prep.toString() + "' using QueryParser");
-        //Query searchQuery = queryParser.parse(prep.toString());
-
-        indexSearcher.search(searx, docCollector);
-        searchResults = docCollector.topDocs().scoreDocs;
-
-        return searchResults;
-    }
-
-    public void Test(String input, String input2) throws IOException, ParseException {
-
-        IndexReader r =DirectoryReader.open(FSDirectory.open(Paths.get("Index")));
-        IndexSearcher searcher = new IndexSearcher(indexReader);
-
-        MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
-                analyzer);
-        queryParser.setDefaultOperator(QueryParser.OR_OPERATOR);
-        TermQuery query1 = new TermQuery(new Term(TReSaFields.BODY,input));
-        TermQuery query2 = new TermQuery(new Term(TReSaFields.BODY,input2));
-        Query searx = queryParser.parse(query1 + "NOT" + query2);
-        BooleanQuery matchingQuery = new BooleanQuery.Builder()
-                .add(query1,BooleanClause.Occur.SHOULD)
-                .add(query2,BooleanClause.Occur.MUST_NOT)
-                .build();
-        //TotalHits hits = this.search(matchingQuery.toString());
-
     }
 
     public IndexSearcher getIndexSearcher()

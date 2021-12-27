@@ -99,24 +99,9 @@ public class TReSaMain {
                     e.printStackTrace();
                 }
 
-            }else if(selection == 6) //BooleanQuery search
-            {
-                try
-                {
-                    String queryInput = scanner.nextLine();
-                    String queryInput2 = scanner.nextLine();
-                    //System.out.println(queryInput);
-                    QuerySearch docSearcher = new QuerySearch();
-                    ScoreDoc[] searchResults = docSearcher.testSearch(queryInput,queryInput2);
-                    printSearchResults(searchResults,queryInput,docSearcher.getIndexSearcher());
-                    docSearcher.closeReader();
-
-                } catch (IOException | ParseException e)
-                {
-                    e.printStackTrace();
-                }
-
             }
+
+
 //            else
 //            {
 //                try {
@@ -194,114 +179,99 @@ public class TReSaMain {
         for (String frag : arr)
         {
 
-            System.out.println("=======================");
-            System.out.println(frag);
+//            System.out.println("=======================");
+//            System.out.println(frag);
             return frag;
         }
         return null;
     }
 
-    protected static HashMap<String,String> printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
+    protected static HashMap<String,HashMap<String,Float>> printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
 
-        // TODO NOT COMPLETE YET NEED TO GET ALL FIELDS NOT ONLY ONE
         StringBuilder result = new StringBuilder(" ");
 
         SimpleHTMLFormatter formatter = new SimpleHTMLFormatter();
 
-        //It scores text fragments by the number of unique query terms found
-        //Basically the matching score in layman terms
         QueryScorer scorer = new QueryScorer(query);
 
-        //used to markup highlighted terms found in the best sections of a text
         Highlighter highlighter = new Highlighter(formatter, scorer);
 
-        //It breaks text up into same-size texts but does not split up spans
-        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 15);
+        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 35);
 
-        //breaks text up into same-size fragments with no concerns over spotting sentence boundaries.
-        //Fragmenter fragmenter = new SimpleFragmenter(10);
-
-        //set fragmenter to highlighter
         highlighter.setTextFragmenter(fragmenter);
         StringBuilder toReturn = new StringBuilder();
-        HashMap<String,String> mapped = new HashMap<>();
+        HashMap<String,HashMap<String,Float>> mapped = new HashMap<>();
 
-        if (searchResults != null && searchResults.length > 0)
-        {
+        try {
+            if (searchResults != null && searchResults.length > 0) {
 
-            System.out.println(searchResults.length + " documents found");
-            result = new StringBuilder(searchResults.length + " document found");
-            for (int i = 0; i < searchResults.length; i++)
-            {
-                int docIndex = searchResults[i].doc;
-                Document doc;
-                try {
-                    doc = indexSearcher.doc(docIndex);
-                    String filepath = doc.get("fileName");
-                    File file = new File(filepath);
-                    String filename = file.getName();
-                    System.out.println("Document Name: " + filename);
-                    //result.append("Document Name: ").append(filename);
-                    System.out.println("Rank: " + (i + 1));
-                    //result.append("Rank: ").append(i+1);
-                    System.out.println("Path: " + filepath);
-                    //result.append("PAth: ").append(filepath);
-                    System.out.println("Relevance Score: " + searchResults[i].score);
-                    //result.append("Relevance Score: " ).append(searchResults[i].score);
-                    result.append(" Document Name: ").append(" Rank: ").append(i+1).append(" ").append(filename).append(" ")
-                            .append(searchResults[i].score).append(doc.get("title"));
+                //System.out.println(searchResults.length + " documents found");
+                result = new StringBuilder(searchResults.length + " document found");
+                for (int i = 0; i < searchResults.length; i++) {
+                    int docIndex = searchResults[i].doc;
+                    Document doc;
+                    try {
+                        doc = indexSearcher.doc(docIndex);
+                        String filepath = doc.get("fileName");
+                        File file = new File(filepath);
+                        String filename = file.getName();
+//                        System.out.println("Document Name: " + filename);
+//
+//                        System.out.println("Rank: " + (i + 1));
+//
+//                        System.out.println("Path: " + filepath);
+//
+//                        System.out.println("Relevance Score: " + searchResults[i].score);
 
-
-                    String body;
-                    String title;
-                    String places;
-                    String people;
+                        result.append(" Document Name: ").append(" Rank: ").append(i + 1).append(" ").append(filename).append(" ")
+                                .append(searchResults[i].score).append(doc.get("title"));
 
 
-                    String[] fragsBody = highlighter.getBestFragments(new StandardAnalyzer(),"body",doc.get(TReSaFields.BODY),10);
-                    //toReturn = simplePrint(frags);
-                    //toReturn.append(simplePrint(frags));
-                    body = simplePrint(fragsBody);
+                        String body;
+                        String title;
+                        String places;
+                        String people;
 
-                    String[] fragsTitle = highlighter.getBestFragments(new StandardAnalyzer(),"title",doc.get(TReSaFields.TITLE),10);
-                    //toReturn = simplePrint(frags);
-                    //toReturn.append(simplePrint(frags));
-                    title = simplePrint(fragsTitle);
 
-                    String[] fragsPlaces = highlighter.getBestFragments(new StandardAnalyzer(),"places",doc.get(TReSaFields.PLACES),10);
-                    //toReturn = simplePrint(frags);
-                    //toReturn.append(simplePrint(frags));
-                    places = simplePrint(fragsPlaces);
+                        String[] fragsBody = highlighter.getBestFragments(new StandardAnalyzer(), "body", doc.get(TReSaFields.BODY), 10);
+                        body = simplePrint(fragsBody);
 
-                    String[] fragsPeople = highlighter.getBestFragments(new StandardAnalyzer(),"people",doc.get(TReSaFields.PEOPLE),10);
-                    //toReturn = simplePrint(frags);
-                    //toReturn.append(simplePrint(frags));
-                    people = simplePrint(fragsPeople);
+                        String[] fragsTitle = highlighter.getBestFragments(new StandardAnalyzer(), "title", doc.get(TReSaFields.TITLE), 10);
+                        title = simplePrint(fragsTitle);
 
-                    String[] allStrings = {body,title,places,people};
+                        String[] fragsPlaces = highlighter.getBestFragments(new StandardAnalyzer(), "places", doc.get(TReSaFields.PLACES), 10);
+                        places = simplePrint(fragsPlaces);
 
-                    for (String s : allStrings){
-                        if (s!=null){
-                            mapped.put(filename,s + " " + searchResults[i].score);
+                        String[] fragsPeople = highlighter.getBestFragments(new StandardAnalyzer(), "people", doc.get(TReSaFields.PEOPLE), 10);
+                        people = simplePrint(fragsPeople);
+
+                        String[] allStrings = {body, title, places, people};
+
+                        for (String s : allStrings) {
+                            if (s != null) {
+//                                mapped.put(filename, new HashMap(){{(put(s,searchResults[i].score))}});
+                                HashMap<String,Float> temp = new HashMap<>();
+                                temp.put(s,searchResults[i].score);
+                                mapped.put(filename, temp);
+                            }
                         }
+
+
+                    } catch (IOException e) {
+                        //System.out.println("Document with id - " + docIndex + " no longer exists");
+                        result.append("Document with id - ").append(docIndex).append(" no longer exists");
+                    } catch (InvalidTokenOffsetsException e) {
+                        e.printStackTrace();
                     }
-
-
-                } catch (IOException e) {
-                    System.out.println("Document with id - " + docIndex + " no longer exists");
-                    result.append("Document with id - ").append(docIndex).append(" no longer exists");
-                } catch (InvalidTokenOffsetsException e) {
-                    e.printStackTrace();
                 }
+            } else {
+                //System.out.println("No documents found for the query: " + searchQuery);
+                result.append("No documents found for the query: ").append(searchQuery);
             }
-        } else {
-            System.out.println("No documents found for the query: " + searchQuery);
-            result.append("No documents found for the query: ").append(searchQuery);
+        }catch (NullPointerException e){
+            System.err.println("File with wrong format");
         }
 
-        for (Map.Entry<String,String> entry : mapped.entrySet()){
-            System.out.println(entry.getKey() + " " + entry.getValue());
-        }
         return mapped;
     }
 

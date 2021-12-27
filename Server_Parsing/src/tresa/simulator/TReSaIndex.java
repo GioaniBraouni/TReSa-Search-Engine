@@ -14,6 +14,7 @@ import org.apache.lucene.analysis.core.StopFilterFactory;
 import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.synonym.SynonymFilterFactory;
 import org.apache.lucene.document.*;
@@ -56,6 +57,12 @@ public class TReSaIndex {
 
         stopSet.addAll(enStopSet);
 
+
+        Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
+        analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer(stopSet));
+        analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer(stopSet));
+        analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer(stopSet));
+        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(stopSet), analyzerMap);
 //        Analyzer custom = CustomAnalyzer.builder()
 //                .withTokenizer("standard")
 //                .addTokenFilter("lowercase")
@@ -66,7 +73,9 @@ public class TReSaIndex {
 //                .endwhen()
 //                .build();
 
-        IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
+        //IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
+
+        IndexWriterConfig config = new IndexWriterConfig(wrapper);
 
         writer = new IndexWriter(indexDirectory, config); // The IndexWriterConfig.OpenMode option on IndexWriterConfig.setOpenMode(OpenMode) determines whether a new index is created, or whether an existing index is opened.
     }
@@ -161,30 +170,35 @@ public class TReSaIndex {
         StringBuilder stringBuilder = new StringBuilder();
 
         String currentLine; // If line contains <TITLE> give more weight. (IDEA)
-        while ((currentLine = articleReader.readLine()) != null)
-        {
-            String result = currentLine.toLowerCase(Locale.ROOT);
+        try {
 
-            prep = new Preprocessor(result);
 
-            if (result.contains("title")) {
-                document.add(new Field(TReSaFields.TITLE, prep.toString(), TextField.TYPE_STORED));
-            } else if (result.contains("places")) {
-                document.add(new Field(TReSaFields.PLACES, prep.toString(), TextField.TYPE_STORED));
-            } else if (result.contains("people")) {
-                //result = result.replaceAll("people"," ");
-                document.add(new Field(TReSaFields.PEOPLE, prep.toString(), TextField.TYPE_STORED));
-            } else {
-                assert stringBuilder != null;
-                stringBuilder.append(prep.toString());
-                //document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
+            while ((currentLine = articleReader.readLine()) != null) {
+                String result = currentLine.toLowerCase(Locale.ROOT);
+
+                //prep = new Preprocessor(result);
+
+                if (result.contains("title")) {
+                    document.add(new Field(TReSaFields.TITLE, result.toString(), TextField.TYPE_STORED));
+                } else if (result.contains("places")) {
+                    document.add(new Field(TReSaFields.PLACES, result.toString(), TextField.TYPE_STORED));
+                } else if (result.contains("people")) {
+                    //result = result.replaceAll("people"," ");
+                    document.add(new Field(TReSaFields.PEOPLE, result.toString(), TextField.TYPE_STORED));
+                } else {
+                    assert stringBuilder != null;
+                    stringBuilder.append(result.toString());
+                    //document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
+                }
+                //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
             }
-            //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
-        }
-        document.add(new Field(TReSaFields.BODY, stringBuilder.toString(), TextField.TYPE_STORED));
-        document.add(new Field(TReSaFields.FILENAME,file.getName(),StringField.TYPE_STORED));
+            document.add(new Field(TReSaFields.BODY, stringBuilder.toString(), TextField.TYPE_STORED));
+            document.add(new Field(TReSaFields.FILENAME, file.getName(), StringField.TYPE_STORED));
 
-        articleReader.close();
+            articleReader.close();
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
         return document;
     }
 
@@ -202,23 +216,24 @@ public class TReSaIndex {
 
 
     private void deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
-        Document doc = getDocument(file);
-        Term contentTerm = new Term(TReSaFields.BODY,doc.get(TReSaFields.BODY));
-        Term titleTerm = new Term(TReSaFields.TITLE,doc.get(TReSaFields.TITLE));
-        Term placesTerm = new Term(TReSaFields.PLACES,doc.get(TReSaFields.PLACES));
-        Term peopleTerm = new Term(TReSaFields.PEOPLE,doc.get(TReSaFields.PEOPLE));
-        Term fileTerm = new Term(TReSaFields.FILENAME,doc.get(TReSaFields.FILENAME));
+        try {
+            Document doc = getDocument(file);
+            Term contentTerm = new Term(TReSaFields.BODY, doc.get(TReSaFields.BODY));
+            Term titleTerm = new Term(TReSaFields.TITLE, doc.get(TReSaFields.TITLE));
+            Term placesTerm = new Term(TReSaFields.PLACES, doc.get(TReSaFields.PLACES));
+            Term peopleTerm = new Term(TReSaFields.PEOPLE, doc.get(TReSaFields.PEOPLE));
+            Term fileTerm = new Term(TReSaFields.FILENAME, doc.get(TReSaFields.FILENAME));
 
-        writer.deleteDocuments(fileTerm);
-        writer.deleteDocuments(contentTerm);
-        writer.deleteDocuments(titleTerm);
-        writer.deleteDocuments(placesTerm);
-        writer.deleteDocuments(peopleTerm);
+            writer.deleteDocuments(fileTerm);
+            writer.deleteDocuments(contentTerm);
+            writer.deleteDocuments(titleTerm);
+            writer.deleteDocuments(placesTerm);
+            writer.deleteDocuments(peopleTerm);
+        }catch (NullPointerException e){
+            System.err.println("Wrong File Format");
+        }
 
-        //writer.commit();
-        //writer.forceMergeDeletes();
 
-        //writer.close();
 
     }
 
