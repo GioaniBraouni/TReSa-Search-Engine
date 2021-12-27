@@ -1,6 +1,7 @@
 package tresa.simulator.tresa_indexer;
 
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -10,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -21,8 +23,7 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.Socket;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 import static tresa.simulator.tresa_indexer.TReSaResults.obs;
 
@@ -86,19 +87,63 @@ public class TReSaMain extends Application
                 Scanner fromClient = new Scanner(socket.getInputStream());
                 toServer.println(searchBar.getText());
 
+                HashMap<String,HashMap<String,Float>> received = new HashMap<>();
 
-                BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                BufferedReader inp2 = new BufferedReader(input);
 
-                String initialString = inp2.readLine();
-                String[] strings = initialString.split("\t");
-                for (String s : strings){
-                    obs.add(new Articles(s));
+                InputStream inputStream = socket.getInputStream();
+                ObjectInputStream obj = new ObjectInputStream(inputStream);
+                List<Button> buttonList = new ArrayList<>();
+                received =  (HashMap) obj.readObject();
+
+                for (HashMap.Entry<String,HashMap<String ,Float>> entry : received.entrySet()){
+                    String filename = entry.getKey();
+                    for (HashMap.Entry<String,Float> next : entry.getValue().entrySet()){
+                        String output = next.getKey();
+                        Float score = next.getValue();
+                        Button btn = new Button(filename);
+                        buttonList.add(btn);
+                        obs.add(new Articles(btn,output,score));
+                    }
                 }
+
+
+
+
+//                for (Map.Entry<String,String> entry : received.entrySet()){
+//                    Button btn = new Button(entry.getKey());
+//                    obs.add(new Articles(btn,entry.getValue()));
+//                    buttonList.add(btn);
+//                }
+                for (Button btn : buttonList){
+                    btn.setOnMouseEntered(new EventHandler<MouseEvent>() {
+
+                        @Override
+                        public void handle(MouseEvent t) {
+                            btn.setStyle("-fx-color:blue;");
+                        }
+                    });
+                    btn.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+                        @Override
+                        public void handle(MouseEvent t) {
+                            btn.setStyle("-fx-color:white;");
+                        }
+                    });
+                    btn.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent actionEvent) {
+                            HostServices hostServices = getHostServices();
+                            hostServices.showDocument("../Server_Parsing/Reuters/"+btn.getText());
+                        }
+                    });
+                }
+
 
 
             }catch (IOException e){
                 System.err.println("Server Down");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
         });
 
@@ -125,7 +170,7 @@ public class TReSaMain extends Application
                              PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
                         ){
 
-                            toServer.println("@@@"+url);
+                            toServer.println("6^7"+url);
 
                         }catch (IOException e){
                             System.err.println("Server Down");
@@ -141,8 +186,8 @@ public class TReSaMain extends Application
         addFile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-
-                List<File> list = fileChooser.showOpenMultipleDialog(stage);
+                List<File> list = new LinkedList<>();
+                list = fileChooser.showOpenMultipleDialog(stage);
 
                 if (list != null){
                     for (File file : list){

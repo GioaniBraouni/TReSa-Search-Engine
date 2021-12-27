@@ -1,33 +1,51 @@
 package tresa.simulator.tresa_indexer;
 
+import javafx.scene.control.Button;
+
 public class Articles {
-    private String title;
+    private Button title;
     private String places;
     private String people;
     private String body;
+    private Float score;
 
-    public Articles(String title,String places,String people,String body) {
+    public Articles(Button title,String places,String people,String body) {
         this.title = title;
         this.places = places;
         this.people = people;
         this.body = body;
     }
 
-    public Articles(String title, String places) {
+    public Articles(Button title,String places,Float score) {
+        this.title = title;
+        this.places = places;
+        this.score = score;
+    }
+
+    public Articles(Button title, String places) {
         this.title = title;
         this.places = places;
     }
 
-    public Articles(String title) {
+    public Articles(Button title) {
         this.title = title;
 
     }
 
-    public String getTitle() {
+
+    public Float getScore() {
+        return score;
+    }
+
+    public void setScore(Float score) {
+        this.score = score;
+    }
+
+    public Button getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(Button title) {
         this.title = title;
     }
 

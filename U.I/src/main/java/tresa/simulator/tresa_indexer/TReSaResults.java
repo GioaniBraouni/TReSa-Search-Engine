@@ -22,6 +22,7 @@ import java.util.List;
 
 public class TReSaResults
 {
+
     private static TextField searchBar = new TextField();
     public static List<String> list = new ArrayList<String>();
     public static ObservableList<Articles> obs = FXCollections.observableArrayList();
@@ -53,19 +54,26 @@ public class TReSaResults
 
         TableView elements = new TableView<>();
 
-        TableColumn<Articles,String> column1 = new TableColumn<>("Documents");
-        column1.setMinWidth(1200.00);
+        TableColumn<Articles,String> column1 = new TableColumn<>("File Name");
+        TableColumn<Articles,String> column2 = new TableColumn<>("Contains");
+        TableColumn<Articles,String> column3 = new TableColumn<>("Contains");
+        column1.setMinWidth(120.00);
         column1.setCellValueFactory(new PropertyValueFactory<>("title"));
-
+        column2.setCellValueFactory(new PropertyValueFactory<>("places"));
+        column2.setMinWidth(1800.00);
+        column3.setCellValueFactory(new PropertyValueFactory<>("score"));
+        column3.setMinWidth(120.00);
         elements.getColumns().add(column1);
+        elements.getColumns().add(column2);
+        elements.getColumns().add(column3);
 
 
         elements.setItems(obs);
 
-
+        elements.setMinWidth(1200);
         results.getChildren().add(elements);
         elements.setStyle("-fx-alignment:CENTER;");
-        elements.setStyle("-fx-font-weight:bold;");
+        column2.setStyle("-fx-font-weight:bold;");
         //MINE
 
 
