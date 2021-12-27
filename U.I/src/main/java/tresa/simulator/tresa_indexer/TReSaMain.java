@@ -85,7 +85,7 @@ public class TReSaMain extends Application
             try (Socket socket = new Socket("localhost",5555)){
                 PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
                 Scanner fromClient = new Scanner(socket.getInputStream());
-                toServer.println(searchBar.getText());
+                toServer.println(searchBar.getText().toLowerCase(Locale.ROOT));
 
                 HashMap<String,HashMap<String,Float>> received = new HashMap<>();
 
@@ -106,14 +106,6 @@ public class TReSaMain extends Application
                     }
                 }
 
-
-
-
-//                for (Map.Entry<String,String> entry : received.entrySet()){
-//                    Button btn = new Button(entry.getKey());
-//                    obs.add(new Articles(btn,entry.getValue()));
-//                    buttonList.add(btn);
-//                }
                 for (Button btn : buttonList){
                     btn.setOnMouseEntered(new EventHandler<MouseEvent>() {
 
@@ -136,6 +128,8 @@ public class TReSaMain extends Application
                             hostServices.showDocument("../Server_Parsing/Reuters/"+btn.getText());
                         }
                     });
+
+
                 }
 
 
