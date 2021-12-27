@@ -56,7 +56,7 @@ public class TReSaResults
 
         TableColumn<Articles,String> column1 = new TableColumn<>("File Name");
         TableColumn<Articles,String> column2 = new TableColumn<>("Contains");
-        TableColumn<Articles,String> column3 = new TableColumn<>("Contains");
+        TableColumn<Articles,String> column3 = new TableColumn<>("Score");
         column1.setMinWidth(120.00);
         column1.setCellValueFactory(new PropertyValueFactory<>("title"));
         column2.setCellValueFactory(new PropertyValueFactory<>("places"));
