@@ -168,11 +168,12 @@ public class TReSaMain {
         sec.close();
     }
 
-    protected void deleteSingleFileFromUI(String deleteFile) throws IOException, NoSuchAlgorithmException {
+    protected boolean deleteSingleFileFromUI(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
         sec = new TReSaIndex(indexDir);
-        sec.fromUI(deleteFile);
+        Boolean wasItDeleted = sec.fromUI(deleteFile);
         sec.close();
+        return wasItDeleted;
     }
 
     private static String simplePrint(String[] arr){
@@ -186,7 +187,7 @@ public class TReSaMain {
         return null;
     }
 
-    protected static HashMap<String,HashMap<String,Float>> printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) {
+    protected static HashMap<String,HashMap<String,Float>> printSearchResults(ScoreDoc[] searchResults, String searchQuery, IndexSearcher indexSearcher) throws IOException {
 
         StringBuilder result = new StringBuilder(" ");
 
@@ -257,6 +258,7 @@ public class TReSaMain {
                         }
 
 
+
                     } catch (IOException e) {
                         //System.out.println("Document with id - " + docIndex + " no longer exists");
                         result.append("Document with id - ").append(docIndex).append(" no longer exists");
@@ -271,6 +273,7 @@ public class TReSaMain {
         }catch (NullPointerException e){
             System.err.println("File with wrong format");
         }
+
 
         return mapped;
     }

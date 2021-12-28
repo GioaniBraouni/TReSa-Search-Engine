@@ -1,5 +1,6 @@
 package tresa.simulator;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,17 +10,18 @@ import java.util.Map;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
+import org.apache.lucene.search.spell.Dictionary;
+import org.apache.lucene.search.spell.LuceneDictionary;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.queryparser.classic.QueryParser;
 
 public class QuerySearch {
@@ -27,6 +29,7 @@ public class QuerySearch {
     Directory indexDirectory;
     IndexReader indexReader;
     Analyzer analyzer;
+
 
 
     public QuerySearch() throws IOException
@@ -74,4 +77,6 @@ public class QuerySearch {
     {
         this.indexReader.close();
     }
+
+
 }

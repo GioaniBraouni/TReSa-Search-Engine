@@ -1,12 +1,10 @@
 package tresa.simulator;
 
+import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +17,8 @@ public class Server extends Thread {
     public String complete = "";
     public static int ended = 0;
     TReSaMain main;
+    TReSaIndex index;
+    public File file = new File(this.complete);
 
 
 
@@ -47,6 +47,10 @@ public class Server extends Thread {
                             String selectedFile = this.complete;
                             try {
                                 tester.singleFile(selectedFile);
+                                OutputStream outputStream = client.getOutputStream();
+                                ObjectOutputStream out = new ObjectOutputStream(outputStream);
+                                out.writeObject("File " + this.complete + " has been indexed");
+                                out.close();
                             } catch (IOException | ParseException | NoSuchAlgorithmException | NullPointerException e) {
                                 e.printStackTrace();
                             }
@@ -58,6 +62,10 @@ public class Server extends Thread {
                             String selectedFile = this.complete;
                             try {
                                 tester.createOneIndex(selectedFile);
+                                OutputStream outputStream = client.getOutputStream();
+                                ObjectOutputStream out = new ObjectOutputStream(outputStream);
+                                out.writeObject("Folder " + this.complete + " has been indexed");
+                                out.close();
                             } catch (IOException | ParseException | NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }
@@ -67,8 +75,17 @@ public class Server extends Thread {
                             TReSaMain tester = new TReSaMain();
                             //System.out.println("Name of file");
                             String selectedFile = this.complete;
+                            OutputStream outputStream = client.getOutputStream();
+                            ObjectOutputStream out = new ObjectOutputStream(outputStream);
+
                             try {
-                                tester.deleteSingleFileFromUI(selectedFile);
+                                if(tester.deleteSingleFileFromUI(selectedFile)){
+                                    out.writeObject("File " + this.complete + " has been deleted");
+                                    out.close();
+                                }else{
+                                    out.writeObject("File " + this.complete + " is not indexed");
+                                    out.close();
+                                }
                             } catch (IOException | NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }

@@ -208,36 +208,42 @@ public class TReSaIndex {
         deleteDoc(file);
     }
 
-    public void fromUI(String fileName) throws IOException, NoSuchAlgorithmException {
+    public boolean fromUI(String fileName) throws IOException, NoSuchAlgorithmException {
         File file = new File(fileName);
         System.out.println("Deleting: " + fileName);
-        deleteDoc(file);
+        return deleteDoc(file);
     }
 
 
-    private void deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
+    private boolean deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
         try {
             Document doc = getDocument(file);
-            Term contentTerm = new Term(TReSaFields.BODY, doc.get(TReSaFields.BODY));
-            Term titleTerm = new Term(TReSaFields.TITLE, doc.get(TReSaFields.TITLE));
-            Term placesTerm = new Term(TReSaFields.PLACES, doc.get(TReSaFields.PLACES));
-            Term peopleTerm = new Term(TReSaFields.PEOPLE, doc.get(TReSaFields.PEOPLE));
-            Term fileTerm = new Term(TReSaFields.FILENAME, doc.get(TReSaFields.FILENAME));
+            if (isAlreadyIndexed(doc)) {
+                Term contentTerm = new Term(TReSaFields.BODY, doc.get(TReSaFields.BODY));
+                Term titleTerm = new Term(TReSaFields.TITLE, doc.get(TReSaFields.TITLE));
+                Term placesTerm = new Term(TReSaFields.PLACES, doc.get(TReSaFields.PLACES));
+                Term peopleTerm = new Term(TReSaFields.PEOPLE, doc.get(TReSaFields.PEOPLE));
+                Term fileTerm = new Term(TReSaFields.FILENAME, doc.get(TReSaFields.FILENAME));
 
-            writer.deleteDocuments(fileTerm);
-            writer.deleteDocuments(contentTerm);
-            writer.deleteDocuments(titleTerm);
-            writer.deleteDocuments(placesTerm);
-            writer.deleteDocuments(peopleTerm);
+                writer.deleteDocuments(fileTerm);
+                writer.deleteDocuments(contentTerm);
+                writer.deleteDocuments(titleTerm);
+                writer.deleteDocuments(placesTerm);
+                writer.deleteDocuments(peopleTerm);
+                return true;
+            }else{
+                System.out.println("This document is not indexed");
+                return false;
+            }
         }catch (NullPointerException e){
             System.err.println("Wrong File Format");
         }
-
+        return false;
 
 
     }
 
-    private boolean isAlreadyIndexed(Document document) throws IOException {
+    protected boolean isAlreadyIndexed(Document document) throws IOException {
         // Prwto check gia file name
 
         Path path = Paths.get(indexDir);
