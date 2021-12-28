@@ -7,7 +7,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -23,6 +25,8 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static tresa.simulator.tresa_indexer.TReSaResults.obs;
@@ -38,6 +42,8 @@ public class TReSaMain extends Application
     private String text = "";
     private Stage stage;
     private boolean showStatus = false;
+
+
 
     @Override
     public void start(Stage stage) throws IOException
@@ -66,6 +72,7 @@ public class TReSaMain extends Application
         searchBox.getChildren().add(image);
         searchBox.setAlignment(Pos.TOP_CENTER);
 
+
         searchBar.setPrefWidth(450);
         searchBar.setFocusTraversable(false);
         searchBar.setPromptText("Αναζήτηση στο TReSA");
@@ -78,6 +85,7 @@ public class TReSaMain extends Application
         Button search = new Button("Search");
         search.setPadding(new Insets(10,30,10,30));
         search_options.getChildren().add(search);
+
 
         search.setOnAction(event ->
         {
@@ -94,6 +102,8 @@ public class TReSaMain extends Application
                 ObjectInputStream obj = new ObjectInputStream(inputStream);
                 List<Button> buttonList = new ArrayList<>();
                 received =  (HashMap) obj.readObject();
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
 
                 for (HashMap.Entry<String,HashMap<String ,Float>> entry : received.entrySet()){
                     String filename = entry.getKey();
@@ -103,8 +113,18 @@ public class TReSaMain extends Application
                         Button btn = new Button(filename);
                         buttonList.add(btn);
                         obs.add(new Articles(btn,output,score));
+
                     }
                 }
+
+                PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("searches.txt",true)));
+                if (received.isEmpty()){
+                    writer.println(searchBar.getText()  + "\t No results returned" + "\t" + dtf.format(now));
+                }else{
+                    writer.println(searchBar.getText() + "\t" + received.size() + " results where found" + "\t" + dtf.format(now));
+                }
+
+                writer.close();
 
                 for (Button btn : buttonList){
                     btn.setOnMouseEntered(new EventHandler<MouseEvent>() {
@@ -162,11 +182,21 @@ public class TReSaMain extends Application
                         String url = directory.getAbsolutePath();
                         try (Socket socket = new Socket("localhost",5555);
                              PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
+                             InputStream fromClient =  socket.getInputStream();
                         ){
 
                             toServer.println("6^7"+url);
 
-                        }catch (IOException e){
+                            ObjectInputStream in = new ObjectInputStream(fromClient);
+                            String response = (String) in.readObject();
+
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
+                            alert.showAndWait();
+                            if (alert.getResult()==ButtonType.YES){
+                                alert.close();
+                            }
+
+                        }catch (IOException | NullPointerException | ClassNotFoundException e){
                             System.err.println("Server Down");
                         }
 
@@ -188,12 +218,24 @@ public class TReSaMain extends Application
                         String url = file.getAbsolutePath();
                         try (Socket socket = new Socket("localhost",5555);
                              PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
+                             InputStream fromClient =  socket.getInputStream();
                         ){
 
                             toServer.println("@@@"+url);
 
-                        }catch (IOException e){
+                            ObjectInputStream in = new ObjectInputStream(fromClient);
+                            String response = (String) in.readObject();
+
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
+                            alert.showAndWait();
+                            if (alert.getResult()==ButtonType.YES){
+                                alert.close();
+                            }
+
+                        }catch (IOException | NullPointerException e){
                             System.err.println("Server Down");
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -220,8 +262,14 @@ public class TReSaMain extends Application
                 ){
 
                     toServer.println("@-!"+url);
+                    String output = directory.getAbsolutePath().toString() + " has been deleted from index";
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,output, ButtonType.YES);
+                    alert.showAndWait();
+                    if (alert.getResult()==ButtonType.YES){
+                        alert.close();
+                    }
 
-                }catch (IOException e){
+                }catch (IOException | NullPointerException e){
                     System.err.println("Server Down");
                 }
 
@@ -242,16 +290,37 @@ public class TReSaMain extends Application
                         String url = file.getAbsolutePath();
                         try (Socket socket = new Socket("localhost",5555);
                              PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
+                             InputStream fromClient = socket.getInputStream();
                         ){
 
                             toServer.println("#()"+url);
+                            ObjectInputStream in = new ObjectInputStream(fromClient);
+                            String response = (String) in.readObject();
 
-                        }catch (IOException e){
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
+                            alert.showAndWait();
+                            if (alert.getResult()==ButtonType.YES){
+                                alert.close();
+                            }
+
+                        }catch (IOException | NullPointerException | ClassNotFoundException e){
                             System.err.println("Server Down");
                         }
                     }
                 }
 
+            }
+        });
+
+        Button history = new Button("History");
+        deleteButtons.getChildren().addAll(history);
+        deleteFile.setPadding(new Insets(10,18,10,18));
+
+        history.setOnAction(e -> {
+            try {
+                new History().start(new Stage());
+            } catch (Exception ex) {
+                System.out.println("hi");;
             }
         });
 
@@ -342,7 +411,7 @@ public class TReSaMain extends Application
 
                             toServer.println("@@@"+url);
 
-                        }catch (IOException e){
+                        }catch (IOException | NullPointerException e){
                             System.err.println("Server Down");
                         }
                     }
@@ -386,4 +455,6 @@ public class TReSaMain extends Application
     public static void main(String[] args) {
         launch();
     }
+
+
 }
