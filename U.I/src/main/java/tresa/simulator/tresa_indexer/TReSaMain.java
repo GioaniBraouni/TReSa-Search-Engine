@@ -314,7 +314,9 @@ public class TReSaMain extends Application
 
         Button history = new Button("History");
         deleteButtons.getChildren().addAll(history);
-        deleteFile.setPadding(new Insets(10,18,10,18));
+        history.setPadding(new Insets(10,18,10,18));
+
+        history.setStyle("-fx-pref-width:105");
 
         history.setOnAction(e -> {
             try {
@@ -428,15 +430,6 @@ public class TReSaMain extends Application
 
                 if (fileDir != null){
                     File[] fileList = fileDir.listFiles();
-//                    for(File file:fileList) {
-//                        if (!file.toString().contains(".txt")) {
-//                            Alert alert = new Alert(Alert.AlertType.ERROR, "Only txt file " +
-//                                    "extension is valid!", ButtonType.CLOSE);
-//                            alert.showAndWait();
-//                            fileList = null;
-//                            break;
-//                        }
-//                    }
                     try (Socket socket = new Socket("localhost",5555);
                          PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
                     ){
