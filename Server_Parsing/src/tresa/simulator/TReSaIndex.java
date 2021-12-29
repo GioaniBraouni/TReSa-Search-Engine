@@ -15,8 +15,11 @@ import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilter;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilterFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.synonym.SynonymFilterFactory;
+import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -58,20 +61,14 @@ public class TReSaIndex {
         stopSet.addAll(enStopSet);
 
 
+
         Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
         analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer(stopSet));
         analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer(stopSet));
         analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer(stopSet));
         PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(stopSet), analyzerMap);
-//        Analyzer custom = CustomAnalyzer.builder()
-//                .withTokenizer("standard")
-//                .addTokenFilter("lowercase")
-//                .addTokenFilter("stop")
-//                .whenTerm(t -> t.toString().contains(".") || t.toString().contains(","))
-//                .addTokenFilter("keepword")
-//                .addTokenFilter("stemmeroverride")
-//                .endwhen()
-//                .build();
+
+
 
         //IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
 
@@ -187,7 +184,7 @@ public class TReSaIndex {
                     document.add(new Field(TReSaFields.PEOPLE, result.toString(), TextField.TYPE_STORED));
                 } else {
                     assert stringBuilder != null;
-                    stringBuilder.append(result.toString());
+                    stringBuilder.append(result.toString()).append(" ");
                     //document.add(new Field(TReSaFields.BODY, prep.toString(), TextField.TYPE_STORED));
                 }
                 //Πιθανον σε καποιο field να μην χρειαζεται η προεπεξεργασια.
