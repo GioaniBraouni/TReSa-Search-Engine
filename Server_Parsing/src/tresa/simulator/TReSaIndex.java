@@ -175,11 +175,11 @@ public class TReSaIndex {
 
                 //prep = new Preprocessor(result);
 
-                if (result.contains("title")) {
+                if (result.contains("</title>")) {
                     document.add(new Field(TReSaFields.TITLE, result.toString(), TextField.TYPE_STORED));
-                } else if (result.contains("places")) {
+                } else if (result.contains("</places>")) {
                     document.add(new Field(TReSaFields.PLACES, result.toString(), TextField.TYPE_STORED));
-                } else if (result.contains("people")) {
+                } else if (result.contains("</people>")) {
                     //result = result.replaceAll("people"," ");
                     document.add(new Field(TReSaFields.PEOPLE, result.toString(), TextField.TYPE_STORED));
                 } else {

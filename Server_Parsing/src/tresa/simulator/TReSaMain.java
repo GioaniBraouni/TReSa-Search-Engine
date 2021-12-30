@@ -10,6 +10,7 @@ import java.util.logging.SimpleFormatter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -99,6 +100,35 @@ public class TReSaMain {
                     e.printStackTrace();
                 }
 
+            }
+            else if(selection == 6){
+                try{
+                    //int queryInput = scanner.nextInt();
+                    //String filename = scanner.next();
+                    //System.out.println(queryInput);
+                    QuerySearch docQuerySearch = new QuerySearch();
+                    IndexSearcher indexSearcher = null;
+                    File[] files = new File("Reuters").listFiles();
+                    int i = 0;
+                    for (File f : files)
+                    {
+                        System.out.println(f.getCanonicalPath());
+                        System.out.println(i);
+                        ScoreDoc[] searchResults = docQuerySearch.searchFile(f.getCanonicalPath(),5);
+                        i++;
+
+
+                    }
+
+                    //printSearchResults(searchResults,"test",indexSearcher);
+
+
+
+                } catch (IOException | NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
 
@@ -216,23 +246,13 @@ public class TReSaMain {
                         String filepath = doc.get("fileName");
                         File file = new File(filepath);
                         String filename = file.getName();
-//                        System.out.println("Document Name: " + filename);
-//
-//                        System.out.println("Rank: " + (i + 1));
-//
-//                        System.out.println("Path: " + filepath);
-//
-//                        System.out.println("Relevance Score: " + searchResults[i].score);
-
                         result.append(" Document Name: ").append(" Rank: ").append(i + 1).append(" ").append(filename).append(" ")
                                 .append(searchResults[i].score).append(doc.get("title"));
-
 
                         String body;
                         String title;
                         String places;
                         String people;
-
 
                         String[] fragsBody = highlighter.getBestFragments(new StandardAnalyzer(), "body", doc.get(TReSaFields.BODY), 10);
                         body = simplePrint(fragsBody);
