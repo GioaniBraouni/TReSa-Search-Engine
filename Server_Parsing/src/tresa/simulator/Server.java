@@ -99,6 +99,21 @@ public class Server extends Thread {
                             } catch (IOException | NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }
+                        }else if (this.complete.contains("*&&")){
+                            this.complete = this.complete.substring(3);
+                            String[] fileNameAndNumber = this.complete.split(" ");
+                            String userFile = fileNameAndNumber[0];
+                            int top = Integer.parseInt(fileNameAndNumber[1]);
+                            TReSaMain tester = new TReSaMain();
+                            String selectedFile = this.complete;
+                            OutputStream outputStream = client.getOutputStream();
+                            ObjectOutputStream out = new ObjectOutputStream(outputStream);
+                            try {
+                                HashMap<String,Float> endResults = tester.searchFileInIndex(userFile,top);
+                                out.writeObject(endResults);
+                            } catch (NoSuchAlgorithmException e) {
+                                e.printStackTrace();
+                            }
                         }
                         else {
 
