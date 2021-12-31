@@ -1,1 +1,44 @@
 company	4463 results where found	2021/12/28 16:16:01
+company	5 results where found	2021/12/29 13:31:45
+company	5 results where found	2021/12/29 13:31:49
+company	5 results where found	2021/12/29 13:38:05
+test	 No results returned	2021/12/29 13:38:32
+test	 No results returned	2021/12/29 13:38:45
+company	 No results returned	2021/12/29 13:42:14
+company	5 results where found	2021/12/29 13:42:32
+u.s	2 results where found	2021/12/29 19:28:01
+2,	2 results where found	2021/12/29 19:30:06
+2,34	 No results returned	2021/12/29 19:30:36
+2,34	 No results returned	2021/12/29 19:33:31
+2,3434	 No results returned	2021/12/29 19:33:35
+2,3434,343	 No results returned	2021/12/29 19:33:45
+2,3434	 No results returned	2021/12/29 19:34:49
+2,	2 results where found	2021/12/29 19:34:56
+1,65	 No results returned	2021/12/29 19:35:41
+2,34	 No results returned	2021/12/29 19:41:06
+2,	2 results where found	2021/12/29 19:41:18
+2,	 No results returned	2021/12/29 19:43:26
+2,34	 No results returned	2021/12/29 19:43:30
+1,655.8	1 results where found	2021/12/29 19:50:24
+1,65	 No results returned	2021/12/29 19:50:30
+2.345.345	 No results returned	2021/12/29 19:50:46
+2,345,345	 No results returned	2021/12/29 19:50:53
+2,3434,343	1 results where found	2021/12/29 19:51:08
+2	2 results where found	2021/12/29 19:52:47
+1.	3 results where found	2021/12/29 19:53:02
+1.5	 No results returned	2021/12/29 19:53:11
+2.325	 No results returned	2021/12/29 19:54:00
+2,325	 No results returned	2021/12/29 19:54:05
+2,325and	1 results where found	2021/12/29 19:54:09
+compan	 No results returned	2021/12/29 19:54:22
+50	 No results returned	2021/12/29 21:16:35
+50,000	1 results where found	2021/12/29 21:16:43
+65	229 results where found	2021/12/29 21:17:37
+65,	229 results where found	2021/12/29 21:17:58
+company	4825 results where found	2021/12/29 22:31:52
+/home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article1.txt	6 similar documents found	2021/12/31 14:53:16
+/home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article4.txt	3 similar documents found	2021/12/31 14:53:42
+/home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article1.txt	6 similar documents found	2021/12/31 14:55:53
+company	4826 results where found	2021/12/31 15:00:42
+/home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article1.txt	6 similar documents found	2021/12/31 15:21:48
+/home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article3.txt	6 similar documents found	2021/12/31 15:22:20

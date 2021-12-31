@@ -22,6 +22,11 @@ public class Articles {
         this.score = score;
     }
 
+    public Articles(Button title,Float score){
+        this.title = title;
+        this.score = score;
+    }
+
     public Articles(Button title, String places) {
         this.title = title;
         this.places = places;

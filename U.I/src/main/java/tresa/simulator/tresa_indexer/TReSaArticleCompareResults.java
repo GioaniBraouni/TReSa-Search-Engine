@@ -18,16 +18,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
-public class TReSaResults
-{
+public class TReSaArticleCompareResults {
 
     private static TextField searchBar = new TextField();
-    public static List<String> list = new ArrayList<String>();
-    public static ObservableList<Articles> obs = FXCollections.observableArrayList();
+
+    public static ObservableList<Articles> articleOBS = FXCollections.observableArrayList();
 
     public static void start(String text)
     {
@@ -56,31 +51,29 @@ public class TReSaResults
         // MINE
 
 
-        TableView elements = new TableView<>();
+        TableView articleElements = new TableView<>();
 
         TableColumn<Articles,String> column1 = new TableColumn<>("File Name");
-        TableColumn<Articles,String> column2 = new TableColumn<>("Contains");
-        TableColumn<Articles,Float> column3 = new TableColumn<>("Score");
-        column1.setMinWidth(120.00);
+        TableColumn<Articles,String> column2 = new TableColumn<>("Score");
+        column1.setMinWidth(500.00);
         column1.setCellValueFactory(new PropertyValueFactory<>("title"));
-        column2.setCellValueFactory(new PropertyValueFactory<>("places"));
-        column2.setMinWidth(1500.00);
-        column3.setCellValueFactory(new PropertyValueFactory<>("score"));
-        column3.setMinWidth(120.00);
+        column2.setCellValueFactory(new PropertyValueFactory<>("score"));
+        column2.setMinWidth(500.00);
 
-        column3.setSortType(TableColumn.SortType.DESCENDING);
-        elements.getColumns().addAll(column1,column2,column3);
 
-        elements.setItems(obs);
+        column2.setSortType(TableColumn.SortType.DESCENDING);
+        articleElements.getColumns().addAll(column1,column2);
 
-        elements.getSortOrder().add(column3);
-        column3.setSortable(true);
-        elements.sort();
+        articleElements.setItems(articleOBS);
 
-        elements.setMinWidth(1200);
-        results.getChildren().add(elements);
-        elements.setStyle("-fx-alignment:CENTER;");
-        column2.setStyle("-fx-font-weight:bold;");
+        articleElements.getSortOrder().add(column2);
+        column2.setSortable(true);
+        articleElements.sort();
+
+        articleElements.setMinWidth(1200);
+        results.getChildren().add(articleElements);
+        articleElements.setStyle("-fx-alignment:CENTER;");
+        
         results.minHeight(1000);
         //MINE
 
@@ -101,15 +94,10 @@ public class TReSaResults
 
 
         primaryStage.setOnCloseRequest(event -> {
-            obs.clear();
+            articleOBS.clear();
 
         });
 
 
     }
-
-
-
-
-
 }

@@ -7,10 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -29,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static tresa.simulator.tresa_indexer.TReSaArticleCompareResults.articleOBS;
 import static tresa.simulator.tresa_indexer.TReSaResults.obs;
 
 
@@ -89,11 +87,13 @@ public class TReSaMain extends Application
 
         search.setOnAction(event ->
         {
-            TReSaResults.start(searchBar.getText());
+//            TReSaResults.start(searchBar.getText());
             try (Socket socket = new Socket("localhost",5555)){
                 PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
                 Scanner fromClient = new Scanner(socket.getInputStream());
+
                 toServer.println(searchBar.getText().toLowerCase(Locale.ROOT));
+
 
                 HashMap<String,HashMap<String,Float>> received = new HashMap<>();
 
@@ -159,6 +159,7 @@ public class TReSaMain extends Application
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
+            TReSaResults.start(searchBar.getText());
         });
 
         Button options = new Button("Options");
@@ -313,16 +314,115 @@ public class TReSaMain extends Application
         });
 
         Button history = new Button("History");
-        deleteButtons.getChildren().addAll(history);
+        addButtons.getChildren().addAll(history);
         history.setPadding(new Insets(10,18,10,18));
 
-        history.setStyle("-fx-pref-width:105");
+        history.setStyle("-fx-pref-width:90");
 
         history.setOnAction(e -> {
             try {
                 new History().start(new Stage());
             } catch (Exception ex) {
-                System.out.println("hi");;
+                ex.printStackTrace();
+            }
+        });
+
+        Button articleCompare = new Button("Compare Article");
+        deleteButtons.getChildren().addAll(articleCompare);
+        articleCompare.setPadding(new Insets(10,18,10,18));
+
+        articleCompare.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+                File selected;
+                selected = fileChooser.showOpenDialog(stage);
+
+                TextInputDialog textInputDialog = new TextInputDialog("0");
+                textInputDialog.setTitle("Select top articles");
+                textInputDialog.setContentText("Please select a number");
+                int top = 0;
+//                textInputDialog.showAndWait();
+                Optional<String> userInput = textInputDialog.showAndWait();
+                if (userInput.isPresent()){
+                    top = Integer.parseInt(textInputDialog.getEditor().getText());
+                    textInputDialog.close();
+
+                }else {
+                    textInputDialog.close();
+                }
+
+
+                try (Socket socket = new Socket("localhost",5555)){
+                    PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
+                    Scanner fromClient = new Scanner(socket.getInputStream());
+
+                    toServer.println("*&&"+selected.getCanonicalPath() + " " + top);
+
+
+                    HashMap<String ,Float> results = new HashMap<>();
+
+
+                    InputStream inputStream = socket.getInputStream();
+                    ObjectInputStream obj = new ObjectInputStream(inputStream);
+                    List<Button> buttonList = new ArrayList<>();
+                    results =  (HashMap) obj.readObject();
+
+                    for (HashMap.Entry<String,Float> entry : results.entrySet()){
+                        Button btn = new Button(entry.getKey());
+                        buttonList.add(btn);
+                        articleOBS.add(new Articles(btn,entry.getValue()));
+                    }
+
+
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                    LocalDateTime now = LocalDateTime.now();
+
+
+                    PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("searches.txt",true)));
+                    if (results.isEmpty()){
+                        writer.println(selected  + "\t returned results returned" + "\t" + dtf.format(now));
+                    }else{
+                        writer.println(selected + "\t" + results.size() + " similar documents found" + "\t" + dtf.format(now));
+                    }
+
+                    writer.close();
+
+                    for (Button btn : buttonList){
+                        btn.setOnMouseEntered(new EventHandler<MouseEvent>() {
+
+                            @Override
+                            public void handle(MouseEvent t) {
+                                btn.setStyle("-fx-color:blue;");
+                            }
+                        });
+                        btn.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+                            @Override
+                            public void handle(MouseEvent t) {
+                                btn.setStyle("-fx-color:white;");
+                            }
+                        });
+                        btn.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent actionEvent) {
+                                HostServices hostServices = getHostServices();
+                                hostServices.showDocument("../Server_Parsing/Reuters/"+btn.getText());
+                            }
+                        });
+
+
+                    }
+
+
+
+                }catch (IOException e){
+                    System.err.println("Server Down");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                TReSaArticleCompareResults.start(selected.toString()); //TODO another class
             }
         });
 
