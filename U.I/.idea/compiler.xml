@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="tresa_indexer" />
+        <module name="U.I" />
       </profile>
     </annotationProcessing>
   </component>
