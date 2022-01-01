@@ -100,7 +100,7 @@ public class TReSaIndex {
         Document document = getDocument(file);
 
         if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND) {
-            if (!Server.initialIndex) {
+            if (!Server.hashSet.contains(file.getName())) {
                 System.out.println("Indexing " + file.getCanonicalPath());
                 Server.hashSet.add(file.getName());
                 writer.addDocument(document);

@@ -40,6 +40,7 @@ public class TReSaMain {
 
     public static void main(String[] args) throws IOException {
         Server server = new Server();
+        server.readSet();
         server.start();
         TReSaMain tester = new TReSaMain();
         tester.initialiseIndexWriter();

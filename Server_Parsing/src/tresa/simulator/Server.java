@@ -1,12 +1,18 @@
 package tresa.simulator;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +25,7 @@ public class Server extends Thread {
     TReSaMain main;
     TReSaIndex index;
     public static HashSet<String> hashSet= new HashSet<String>();
-    public static boolean initialIndex = false;
+    //public static boolean initialIndex = false;
     public static boolean foundError;
     public File file = new File(this.complete);
 
@@ -50,7 +56,7 @@ public class Server extends Thread {
                             String selectedFile = this.complete;
                             try {
                                 tester.singleFile(selectedFile);
-                                initialIndex = true;
+                                //initialIndex = true;
                                 OutputStream outputStream = client.getOutputStream();
                                 ObjectOutputStream out = new ObjectOutputStream(outputStream);
                                 out.writeObject("File " + this.complete + " has been indexed");
@@ -68,7 +74,7 @@ public class Server extends Thread {
                             String selectedFile = this.complete;
                             try {
                                 tester.createOneIndex(selectedFile);
-                                initialIndex = true;
+                                //initialIndex = true;
                                 OutputStream outputStream = client.getOutputStream();
                                 ObjectOutputStream out = new ObjectOutputStream(outputStream);
                                 out.writeObject("Folder " + this.complete + " has been indexed");
@@ -176,6 +182,26 @@ public class Server extends Thread {
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+
+
+    }
+
+    public void readSet() throws IOException {
+        Path path = Paths.get("Index");
+        Directory index = FSDirectory.open(path);
+        if (!DirectoryReader.indexExists(index))
+        {
+            return ;
+        }
+        IndexReader r = DirectoryReader.open(index);
+        for (int i=0; i<r.maxDoc(); i++) {
+            Document document =r.document(i);
+            hashSet.add(document.get("fileName"));
+            //System.out.println(document.get("fileName"));
+        }
+
+
+        r.close();
 
 
     }
