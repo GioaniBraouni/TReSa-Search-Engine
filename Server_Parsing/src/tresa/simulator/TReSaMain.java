@@ -2,6 +2,7 @@ package tresa.simulator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -9,12 +10,14 @@ import java.util.*;
 import java.util.Formatter;
 import java.util.logging.SimpleFormatter;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -29,15 +32,17 @@ import org.apache.lucene.store.FSDirectory;
 
 public class TReSaMain {
     String indexDir = "Index"; // REDO
-    String dataDir = "Reuters";
+    String dataDir = "Server_Parsing/Reuters2";
+    public static IndexWriter writer;
     QuerySearch querySearch;
     TReSaIndex sec;
     public static Query query;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Server server = new Server();
         server.start();
         TReSaMain tester = new TReSaMain();
+        tester.initialiseIndexWriter();
         Scanner scanner = new Scanner(System.in);
 
         while (true){
@@ -105,7 +110,6 @@ public class TReSaMain {
                 {
                     e.printStackTrace();
                 }
-
             }
             else if(selection == 6){
                 try{
@@ -122,34 +126,15 @@ public class TReSaMain {
                         System.out.println(i);
                         ScoreDoc[] searchResults = docQuerySearch.searchFile(f.getCanonicalPath(),5);
                         i++;
-
-
                     }
-
                     //printSearchResults(searchResults,"test",indexSearcher);
-
-
-
                 } catch (IOException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
-
-
-//            else
-//            {
-//                try {
-//                    sec.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-
         }
-
-
     }
 
 
@@ -184,64 +169,98 @@ public class TReSaMain {
         return results;
     }
 
+    private static void initialiseIndexWriter() throws IOException {
+        //this directory will contain the indexes
+        Path indexPath = Paths.get("Index");
+        if (!Files.exists(indexPath)) {
+            Files.createDirectory(indexPath);
+        }
+
+        Directory indexDirectory = FSDirectory.open(indexPath);
+
+
+        List<String> stopWords = List.of("places","people","title","body","reuter");
+
+        CharArraySet stopSet = new CharArraySet(stopWords,true);
+
+        CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
+
+        stopSet.addAll(enStopSet);
+
+        Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
+        analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer(stopSet));
+        analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer(stopSet));
+        analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer(stopSet));
+        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(stopSet), analyzerMap);
+
+        IndexWriterConfig config = new IndexWriterConfig(wrapper);
+
+        writer = new IndexWriter(indexDirectory, config);
+    }
+
     private void createIndex() throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(dataDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
+        sec.commit();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
+        System.out.println();
 
     }
 
     //TODO MERGE createIndex && createOneIndex AT THE END
 
     protected void createOneIndex(String selectedDir) throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createIndex(selectedDir, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
+        sec.commit();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
+        System.out.println();
 
     }
 
     protected void singleFile(String selectedFile) throws IOException, ParseException, NoSuchAlgorithmException {
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         int numIndexed;
         long startTime = System.currentTimeMillis();
         numIndexed = sec.createSingleIndex(selectedFile, new TextFileFilter());
         long endTime = System.currentTimeMillis();
-        sec.close();
+        sec.commit();
         System.out.println(numIndexed+" File(s) indexed, time taken: " +
                 (endTime-startTime)+" ms");
+        System.out.println();
 
     }
 
 
     protected void testFileToDelete(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         sec.deletingFiles(deleteFile);
-        sec.close();
+        sec.commit();
     }
 
-    protected void folderDeletion(String deleteFile) throws IOException, NoSuchAlgorithmException, ParseException {
+    protected int folderDeletion(String deleteFile) throws IOException, NoSuchAlgorithmException, ParseException {
         File file = new File(deleteFile);
-        sec = new TReSaIndex(indexDir);
-        sec.deleteFolderFromIndex(deleteFile,new TextFileFilter());
-        sec.close();
+        sec = new TReSaIndex();
+        int numRamDocs = sec.deleteFolderFromIndex(deleteFile,new TextFileFilter());
+        System.out.println(numRamDocs);
+        sec.commit();
+        return numRamDocs;
     }
 
     protected boolean deleteSingleFileFromUI(String deleteFile) throws IOException, NoSuchAlgorithmException {
         File file = new File(deleteFile);
-        sec = new TReSaIndex(indexDir);
+        sec = new TReSaIndex();
         Boolean wasItDeleted = sec.fromUI(deleteFile);
-        sec.close();
+        sec.commit();
         return wasItDeleted;
     }
 

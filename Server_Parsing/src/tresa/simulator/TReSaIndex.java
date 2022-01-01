@@ -28,56 +28,17 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+import static tresa.simulator.TReSaMain.writer;
+
 
 public class TReSaIndex {
-    private IndexWriter writer;
     IndexSearcher searcher;
     String indexDir = "Index";
     QueryParser queryParser;
-    HashSet<String> articleID = new HashSet<>();
 
-    /*
-    TODO FOR INDEX WRITER
-    In either case, documents are added with addDocument and removed with deleteDocuments(Term...) or deleteDocuments(Query...).
-    A document can be updated with updateDocument (which just deletes and then adds the entire document).
-    When finished adding, deleting and updating documents, close should be called.
-     */
-    public TReSaIndex(String indexDirectoryPath) throws IOException {
-        //this directory will contain the indexes
-        Path indexPath = Paths.get(indexDirectoryPath);
-        if (!Files.exists(indexPath)) {
-            Files.createDirectory(indexPath);
-        }
-
-        Directory indexDirectory = FSDirectory.open(indexPath);
-
-
-        List<String> stopWords = List.of("places","people","title","body","reuter");
-
-        CharArraySet stopSet = new CharArraySet(stopWords,true);
-
-        CharArraySet enStopSet = EnglishAnalyzer.ENGLISH_STOP_WORDS_SET;
-
-        stopSet.addAll(enStopSet);
-
-
-
-        Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
-        analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer(stopSet));
-        analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer(stopSet));
-        analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer(stopSet));
-        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(stopSet), analyzerMap);
-
-
-
-        //IndexWriterConfig config = new IndexWriterConfig(new StandardAnalyzer(stopSet)); // Filters StandardTokenizer with LowerCaseFilter and StopFilter, using a configurable list of stop words.
-
-        IndexWriterConfig config = new IndexWriterConfig(wrapper);
-
-        writer = new IndexWriter(indexDirectory, config); // The IndexWriterConfig.OpenMode option on IndexWriterConfig.setOpenMode(OpenMode) determines whether a new index is created, or whether an existing index is opened.
+    public void commit() throws IOException {
+        writer.commit();
     }
-
-
 
     public void close() throws IOException {
         writer.close();
@@ -136,24 +97,39 @@ public class TReSaIndex {
 
 
     private void indexFile(File file) throws IOException, NoSuchAlgorithmException {
-        Path path = Paths.get(indexDir);
-        File dir = new File(indexDir);
-
         Document document = getDocument(file);
 
-
         if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE_OR_APPEND) {
-            if (!isAlreadyIndexed(document)) {
+            if (!Server.initialIndex) {
                 System.out.println("Indexing " + file.getCanonicalPath());
+                Server.hashSet.add(file.getName());
                 writer.addDocument(document);
-            } else {
-                System.out.println("Replacing file : " + file.getCanonicalPath());
-                deletingFiles(file.getCanonicalPath());
-                writer.addDocument(document);
+            }
+            else
+            {
+                //Υποθετουμε οτι για την τροποποιηση πρεπει να διαγραψουμε το κειμενο και να το ξανακανουμε add
+                //Επισης οταν κανουμε add πρεπει να ενημερωσουμε το hashset και να ενημερωσουμε index
+                //Επισης οταν κανουμε delete τα βηματα ειναι ιδια
+                if(Server.hashSet.contains(file.getName()))
+                {
+                    System.out.println("Found " +file.getName() + " in the index");
+                    deleteDoc(file);
+                    Server.hashSet.add(file.getName());
 
+                    System.out.println("Replacing with the new version");
+                    writer.addDocument(document);
+
+                    System.out.println();
+                }
+                else
+                {
+                    Server.hashSet.add(file.getName());
+                    System.out.println("Adding: " + file.getCanonicalPath());
+                    writer.addDocument(document);
+                }
+                //deletingFiles(file.getCanonicalPath());
             }
         }
-
     }
 
     protected Document getDocument(File file) throws IOException, NoSuchAlgorithmException {
@@ -207,7 +183,6 @@ public class TReSaIndex {
 
     public boolean fromUI(String fileName) throws IOException, NoSuchAlgorithmException {
         File file = new File(fileName);
-        System.out.println("Deleting: " + fileName);
         return deleteDoc(file);
     }
 
@@ -215,7 +190,9 @@ public class TReSaIndex {
     private boolean deleteDoc(File file) throws IOException, NoSuchAlgorithmException {
         try {
             Document doc = getDocument(file);
-            if (isAlreadyIndexed(doc)) {
+            System.out.println("Deleting: " + file.getCanonicalPath());
+            if(Server.hashSet.contains(file.getName()))
+            {
                 Term contentTerm = new Term(TReSaFields.BODY, doc.get(TReSaFields.BODY));
                 Term titleTerm = new Term(TReSaFields.TITLE, doc.get(TReSaFields.TITLE));
                 Term placesTerm = new Term(TReSaFields.PLACES, doc.get(TReSaFields.PLACES));
@@ -227,15 +204,21 @@ public class TReSaIndex {
                 writer.deleteDocuments(titleTerm);
                 writer.deleteDocuments(placesTerm);
                 writer.deleteDocuments(peopleTerm);
-                return true;
-            }else{
-                System.out.println("This document is not indexed");
+
+                Server.hashSet.remove(file.getName());
+            }
+            else
+            {
+                System.err.println("File " + file.getName() + " does not exist in the index");
+                Server.foundError = true;
                 return false;
             }
         }catch (NullPointerException e){
             System.err.println("Wrong File Format");
         }
         return false;
+
+
 
 
     }

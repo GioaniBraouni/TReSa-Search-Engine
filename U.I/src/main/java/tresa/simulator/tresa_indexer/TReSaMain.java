@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -51,7 +52,7 @@ public class TReSaMain extends Application
         //indexReuters();
 
         main.setStyle("-fx-background-color: white;");
-        var scene = new Scene(main, 1200, 768);
+        var scene = new Scene(main, 1200, 720);
 
         stage.setScene(scene);
         stage.setTitle("TReSA");
@@ -155,7 +156,7 @@ public class TReSaMain extends Application
 
 
             }catch (IOException e){
-                System.err.println("Server Down");
+                alertError(stage,"Server Down");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -180,33 +181,37 @@ public class TReSaMain extends Application
                 File directory = directoryChooser.showDialog(stage);
                 System.out.println(directory);
 
-                        String url = directory.getAbsolutePath();
-                        try (Socket socket = new Socket("localhost",5555);
-                             PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
-                             InputStream fromClient =  socket.getInputStream();
-                        ){
+                if(directory!=null)
+                {
+                    String url = directory.getAbsolutePath();
+                    try (Socket socket = new Socket("localhost", 5555);
+                         PrintWriter toServer = new PrintWriter(socket.getOutputStream(), true);
+                         InputStream fromClient = socket.getInputStream();
+                    ) {
 
-                            toServer.println("6^7"+url);
+                        toServer.println("6^7" + url);
 
-                            ObjectInputStream in = new ObjectInputStream(fromClient);
-                            String response = (String) in.readObject();
+                        ObjectInputStream in = new ObjectInputStream(fromClient);
+                        String response = (String) in.readObject();
 
-                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
-                            alert.showAndWait();
-                            if (alert.getResult()==ButtonType.YES){
-                                alert.close();
-                            }
-
-                        }catch (IOException | NullPointerException | ClassNotFoundException e){
-                            System.err.println("Server Down");
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, response, ButtonType.YES);
+                        alert.showAndWait();
+                        if (alert.getResult() == ButtonType.YES) {
+                            alert.close();
                         }
 
+                    } catch (IOException | NullPointerException | ClassNotFoundException e) {
+                        alertError(stage, "Connection refused");
+                    }
+                }
+                else
+                    alertError(stage, "Folder not found");
             }
         });
 
-        Button addFile = new Button("Add File");
+        Button addFile = new Button("Add File/Files");
         addButtons.getChildren().addAll(addFolder,addFile);
-        addFile.setPadding(new Insets(10,18,10,18));
+        addFile.setPadding(new Insets(10,5,10,6));
 
         addFile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -229,18 +234,18 @@ public class TReSaMain extends Application
 
                             Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
                             alert.showAndWait();
-                            if (alert.getResult()==ButtonType.YES){
+                            if (alert.getResult()==ButtonType.YES)
                                 alert.close();
-                            }
 
                         }catch (IOException | NullPointerException e){
-                            System.err.println("Server Down");
+                            alertError(stage,"Connection refused");
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }
                     }
                 }
-
+                else
+                    alertError(stage,"File/Files not found");
             }
         });
 
@@ -257,23 +262,36 @@ public class TReSaMain extends Application
                 File directory = directoryChooser.showDialog(stage);
                 System.out.println(directory);
 
+            if(directory!=null) {
                 String url = directory.getAbsolutePath();
-                try (Socket socket = new Socket("localhost",5555);
-                     PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
-                ){
+                try (Socket socket = new Socket("localhost", 5555);
+                     PrintWriter toServer = new PrintWriter(socket.getOutputStream(), true);
+                     InputStream fromClient = socket.getInputStream();
+                ) {
 
-                    toServer.println("@-!"+url);
-                    String output = directory.getAbsolutePath().toString() + " has been deleted from index";
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,output, ButtonType.YES);
-                    alert.showAndWait();
-                    if (alert.getResult()==ButtonType.YES){
-                        alert.close();
+                    toServer.println("@-!" + url);
+
+                    ObjectInputStream in = new ObjectInputStream(fromClient);
+                    String response = (String) in.readObject();
+
+                    if (response.contains("true")) {
+                        String output = directory.getAbsolutePath().toString() + " has been deleted from index";
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, output, ButtonType.YES);
+                        alert.showAndWait();
+                        if (alert.getResult() == ButtonType.YES) {
+                            alert.close();
+                        }
+                    } else {
+                        alertError(stage, ("Directory " + directory.getAbsolutePath() + " contains some files that do not exist in the index"));
                     }
 
-                }catch (IOException | NullPointerException e){
-                    System.err.println("Server Down");
-                }
 
+                } catch (IOException | NullPointerException | ClassNotFoundException e) {
+                    alertError(stage,"Connection refused");
+                }
+            }
+            else
+                alertError(stage,"Directory not found not found");
             }
         });
 
@@ -298,14 +316,19 @@ public class TReSaMain extends Application
                             ObjectInputStream in = new ObjectInputStream(fromClient);
                             String response = (String) in.readObject();
 
-                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
-                            alert.showAndWait();
-                            if (alert.getResult()==ButtonType.YES){
-                                alert.close();
+                            if (response.contains("true")) {
+                                String output = file.getName() + " has been deleted from index";
+                                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, output, ButtonType.YES);
+                                alert.showAndWait();
+                                if (alert.getResult() == ButtonType.YES) {
+                                    alert.close();
+                                }
+                            } else {
+                                alertError(stage, ("File " + file.getName() + " does not exist in the index"));
                             }
 
                         }catch (IOException | NullPointerException | ClassNotFoundException e){
-                            System.err.println("Server Down");
+                            alertError(stage,"Connection refused");
                         }
                     }
                 }
@@ -410,14 +433,9 @@ public class TReSaMain extends Application
                                 hostServices.showDocument("../Server_Parsing/Reuters/"+btn.getText());
                             }
                         });
-
-
                     }
-
-
-
                 }catch (IOException e){
-                    System.err.println("Server Down");
+                    alertError(stage,"Server Down");
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -449,100 +467,26 @@ public class TReSaMain extends Application
         main.setAlignment(Pos.CENTER);
     }
 
-    private void Options()
+    private void alertError(Stage stage, String errorString)
     {
-        final FileChooser fileChooser = new FileChooser();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setContentText(errorString);
+        alert.setHeaderText(null);
+        alert.initOwner(stage);
+        alert.initModality(Modality.WINDOW_MODAL);
+        alert.show();
+    }
 
-        final DirectoryChooser directoryChooser = new DirectoryChooser();
-
-
-        fileChooser.getExtensionFilters().add( // Only txt documents
-                new FileChooser.ExtensionFilter("Text Files","*.txt")
-        );
-
-
-        BorderPane borderPane = new BorderPane();
-
-        Button addFiles = new Button("Add File");
-
-        Button addDirectory = new Button("Add Folder");
-
-        HBox forButtons = new HBox();
-
-        forButtons.getChildren().add(addFiles);
-
-        forButtons.getChildren().add(addDirectory);
-
-        VBox box = new VBox(20);
-
-        Image image = null;
-        try {
-            image = new Image(new File("/home/dimitris/IdeaProjects/Testing_Project/U.I/src/main/java/tresa/simulator/tresa_indexer/images/not_google2.png").toURI().toURL().toExternalForm());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        ImageView imageView = new ImageView(image);
-
-        TextField searchBar = new TextField();
-
-        searchBar.setMaxWidth(300);
-
-        box.getChildren().addAll((imageView),searchBar);
-
-        box.setAlignment(Pos.TOP_CENTER);
-
-        borderPane.setCenter(box);
-
-        forButtons.setAlignment(Pos.TOP_LEFT);
-
-        borderPane.setTop(forButtons);
-
-        addFiles.setOnAction(new EventHandler<ActionEvent>() { // Gets path of Files
-            @Override
-            public void handle(ActionEvent actionEvent) {
-
-                List<File> list = fileChooser.showOpenMultipleDialog(stage);
-
-                if (list != null){
-                    for (File file : list){
-                        String url = file.getAbsolutePath();
-                        try (Socket socket = new Socket("localhost",5555);
-                             PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
-                        ){
-
-                            toServer.println("@@@"+url);
-
-                        }catch (IOException | NullPointerException e){
-                            System.err.println("Server Down");
-                        }
-                    }
-                }
-
-            }
-        });
-
-
-        addDirectory.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                File fileDir = directoryChooser.showDialog(stage);
-
-                if (fileDir != null){
-                    File[] fileList = fileDir.listFiles();
-                    try (Socket socket = new Socket("localhost",5555);
-                         PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
-                    ){
-
-                        toServer.println("!@#" +fileDir.getAbsolutePath());
-
-                    }catch (IOException e){
-                        System.err.println("Server Down");
-                    }
-
-                }
-            }
-        });
+    private void alertInfo(Stage stage, String infoString)
+    {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Info");
+        alert.setContentText(infoString);
+        alert.setHeaderText(null);
+        alert.initOwner(stage);
+        alert.initModality(Modality.WINDOW_MODAL);
+        alert.show();
     }
 
     public static void main(String[] args) {

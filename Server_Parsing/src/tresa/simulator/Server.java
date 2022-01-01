@@ -18,6 +18,9 @@ public class Server extends Thread {
     public static int ended = 0;
     TReSaMain main;
     TReSaIndex index;
+    public static HashSet<String> hashSet= new HashSet<String>();
+    public static boolean initialIndex = false;
+    public static boolean foundError;
     public File file = new File(this.complete);
 
 
@@ -36,17 +39,18 @@ public class Server extends Thread {
                     String clientString = fromClient.nextLine();
 
 
-
+                    foundError = false;
                     this.complete = clientString;
 
                     if (!this.complete.equals("")) {
+                        //addFile
                         if (this.complete.contains("@@@")) {
                             this.complete = this.complete.substring(3);
                             TReSaMain tester = new TReSaMain();
-                            System.out.println("Name of file");
                             String selectedFile = this.complete;
                             try {
                                 tester.singleFile(selectedFile);
+                                initialIndex = true;
                                 OutputStream outputStream = client.getOutputStream();
                                 ObjectOutputStream out = new ObjectOutputStream(outputStream);
                                 out.writeObject("File " + this.complete + " has been indexed");
@@ -55,13 +59,16 @@ public class Server extends Thread {
                                 e.printStackTrace();
                             }
                             this.complete = "";
-                        }else if (this.complete.contains("6^7")){
+                        }
+                        //addFolder
+                        else if (this.complete.contains("6^7")){
                             this.complete = this.complete.substring(3);
                             TReSaMain tester = new TReSaMain();
                             //System.out.println("Name of file");
                             String selectedFile = this.complete;
                             try {
                                 tester.createOneIndex(selectedFile);
+                                initialIndex = true;
                                 OutputStream outputStream = client.getOutputStream();
                                 ObjectOutputStream out = new ObjectOutputStream(outputStream);
                                 out.writeObject("Folder " + this.complete + " has been indexed");
@@ -70,7 +77,9 @@ public class Server extends Thread {
                                 e.printStackTrace();
                             }
                             this.complete = "";
-                        }else if(this.complete.contains("#()")){
+                        }
+                        //deleteFile
+                        else if(this.complete.contains("#()")){
                             this.complete = this.complete.substring(3);
                             TReSaMain tester = new TReSaMain();
                             //System.out.println("Name of file");
@@ -79,27 +88,42 @@ public class Server extends Thread {
                             ObjectOutputStream out = new ObjectOutputStream(outputStream);
 
                             try {
-                                if(tester.deleteSingleFileFromUI(selectedFile)){
-                                    out.writeObject("File " + this.complete + " has been deleted");
-                                    out.close();
+                                tester.deleteSingleFileFromUI(selectedFile);
+                                if(!foundError){
+                                    out.writeObject("true");
                                 }else{
-                                    out.writeObject("File " + this.complete + " is not indexed");
-                                    out.close();
+                                    out.writeObject("false");
                                 }
+                                out.close();
                             } catch (IOException | NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }
                             this.complete = "";
-                        }else if (this.complete.contains("@-!")){
+                        }
+                        //deleteFolder
+                        else if (this.complete.contains("@-!")){
                             this.complete = this.complete.substring(3);
                             TReSaMain tester = new TReSaMain();
+
                             String selectedFile = this.complete;
+                            OutputStream outputStream = client.getOutputStream();
+                            ObjectOutputStream out = new ObjectOutputStream(outputStream);
+
                             try {
                                 tester.folderDeletion(selectedFile);
+                                if(!foundError)
+                                {
+                                    out.writeObject("true");
+                                }
+                                else
+                                    out.writeObject("false");
+                                out.close();
                             } catch (IOException | NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }
-                        }else if (this.complete.contains("*&&")){
+                        }
+                        //articleCompare
+                        else if (this.complete.contains("*&&")){
                             this.complete = this.complete.substring(3);
                             String[] fileNameAndNumber = this.complete.split(" ");
                             String userFile = fileNameAndNumber[0];

@@ -47,7 +47,7 @@ public class QuerySearch {
         indexReader = DirectoryReader.open(indexDirectory);
         indexSearcher = new IndexSearcher(indexReader);
         indexSearcher.setSimilarity(new ClassicSimilarity());
-        index = new TReSaIndex("Index");
+        index = new TReSaIndex();
     }
 
 
