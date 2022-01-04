@@ -54,28 +54,33 @@ public class QuerySearch {
     public ScoreDoc[] search(String query) throws IOException,
             ParseException
     {
-        TopScoreDocCollector docCollector =  TopScoreDocCollector.create(10000, 20000);
-        ScoreDoc[] searchResults = null;
-        Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
-        analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer());
-        analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer());
-        analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer());
-        PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(), analyzerMap);
+        try {
+
+            TopScoreDocCollector docCollector = TopScoreDocCollector.create(10000, 20000);
+            ScoreDoc[] searchResults = null;
+            Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
+            analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer());
+            analyzerMap.put(TReSaFields.TITLE, new StandardAnalyzer());
+            analyzerMap.put(TReSaFields.PLACES, new StandardAnalyzer());
+            PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new EnglishAnalyzer(), analyzerMap);
 
 
+            MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[]{"places", "people", "title", "body"},
+                    wrapper);
 
-        MultiFieldQueryParser queryParser = new MultiFieldQueryParser(new String[] { "places", "people","title","body" },
-                wrapper);
+            //Preprocessor prep = new Preprocessor(query);
+            String prep = query.toString();
+            System.out.println("Searching for '" + prep.toString() + "' using QueryParser");
+            Query searchQuery = queryParser.parse(prep.toString());
+            TReSaMain.query = searchQuery;
+            indexSearcher.search(searchQuery, docCollector);
+            searchResults = docCollector.topDocs().scoreDocs;
 
-        //Preprocessor prep = new Preprocessor(query);
-        String prep = query.toString();
-        System.out.println("Searching for '" + prep.toString() + "' using QueryParser");
-        Query searchQuery = queryParser.parse(prep.toString());
-        TReSaMain.query = searchQuery;
-        indexSearcher.search(searchQuery, docCollector);
-        searchResults = docCollector.topDocs().scoreDocs;
-
-        return searchResults;
+            return searchResults;
+        }catch (ParseException e){
+            System.err.println("Wrong Format");
+        }
+        return null;
     }
 
 
