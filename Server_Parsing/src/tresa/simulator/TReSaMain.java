@@ -313,7 +313,7 @@ public class TReSaMain {
                         String places;
                         String people;
 
-                        String[] fragsBody = highlighter.getBestFragments(new StandardAnalyzer(), "body", doc.get(TReSaFields.BODY), 10);
+                        String[] fragsBody = highlighter.getBestFragments(new EnglishAnalyzer(), "body", doc.get(TReSaFields.BODY), 10);
                         body = simplePrint(fragsBody);
 
                         String[] fragsTitle = highlighter.getBestFragments(new StandardAnalyzer(), "title", doc.get(TReSaFields.TITLE), 10);
