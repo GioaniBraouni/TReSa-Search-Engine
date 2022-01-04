@@ -95,7 +95,8 @@ public class TReSaMain extends Application
                 Scanner fromClient = new Scanner(socket.getInputStream());
                 String text;
                 if (!clicked){
-                    String[] not = {"+" ,"-" ,"&&" ,"|","|" ,"!" ,"( ",")" ,"{" ,"}" ,"[" ,"]","^" ,"~" ,"*" ,"?" ,":" ,"\\"};
+
+                    String[] not = {"+" ,"-" ,"&&" ,"|","||" ,"!" ,"( ",")" ,"{" ,"}" ,"[" ,"]","^" ,"~" ,"*" ,"?" ,":" ,"\\"};
                     text = searchBar.getText().toString().toLowerCase(Locale.ROOT);
                     String[] letters = text.split(("(?!^)"));
 
@@ -110,10 +111,24 @@ public class TReSaMain extends Application
                     }
                     String all = stb.toString();
                     System.out.println(all);
+                    if (all.length() - all.replaceAll("/","").length() == 1){
+                        all = all.replaceAll("/","\\/");
+                    }
                     toServer.println(all);
 
                 }else {
                     text = searchBar.getText().toString();
+                    if (text.contains(" and ")){
+                        text = text.replaceAll(" and "," AND ");
+                    }
+                    if (text.contains(" not ")){
+                        text= text.replaceAll(" not "," NOT ");
+                    }
+                    if (text.contains(" or ")){
+                        text = text.replaceAll(" or "," OR ");
+                    }
+                    System.out.println("2");
+                    System.out.println(text);
                     toServer.println(text);
                 }
 

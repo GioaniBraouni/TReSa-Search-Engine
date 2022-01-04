@@ -73,7 +73,7 @@ public class TReSaArticleCompareResults {
         articleElements.setMinWidth(1200);
         results.getChildren().add(articleElements);
         articleElements.setStyle("-fx-alignment:CENTER;");
-        
+
         results.minHeight(1000);
         //MINE
 

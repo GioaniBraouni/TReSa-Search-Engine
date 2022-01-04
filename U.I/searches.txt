@@ -42,3 +42,53 @@ company	4825 results where found	2021/12/29 22:31:52
 company	4826 results where found	2021/12/31 15:00:42
 /home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article1.txt	6 similar documents found	2021/12/31 15:21:48
 /home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article3.txt	6 similar documents found	2021/12/31 15:22:20
+title:text and body:super	 No results returned (Boolean)	2022/01/04 16:20:41
+body: company not title: oil	5682 results where found (Boolean)	2022/01/04 16:21:35
+company	5846 results where found	2022/01/04 16:26:34
+company	5846 results where found	2022/01/04 16:28:10
+company	5846 results where found	2022/01/04 16:28:26
+title: company not body: oil	55 results where found (Boolean)	2022/01/04 16:28:45
+title:company not body:oil	55 results where found (Boolean)	2022/01/04 16:32:27
+title:company ! body:oil	1423 results where found (Boolean)	2022/01/04 16:32:34
+title:company not body:oil	55 results where found (Boolean)	2022/01/04 16:32:49
+title:company + body:oil	1423 results where found (Boolean)	2022/01/04 16:32:57
++	 No results returned	2022/01/04 16:34:42
+-	 No results returned	2022/01/04 16:34:46
+/	 No results returned	2022/01/04 16:36:50
+^	 No results returned	2022/01/04 16:36:55
+*	 No results returned	2022/01/04 16:37:00
+5/12	1613 results where found	2022/01/04 16:38:01
+5/12/84	1678 results where found	2022/01/04 16:38:31
+5/14/82	1258 results where found	2022/01/04 16:39:27
+5/14/82	1258 results where found	2022/01/04 16:40:50
+5/14/82	1258 results where found	2022/01/04 16:41:13
+5?14?82	 No results returned (Boolean)	2022/01/04 16:42:50
+5/14/82	1258 results where found	2022/01/04 16:43:13
+date:[82-5-14 TO 84-5-14]	 No results returned (Boolean)	2022/01/04 16:44:55
+date:[82-14-5 TO 84-5-14]	 No results returned (Boolean)	2022/01/04 16:45:09
+date:[82-14-5 TO 84-14-5]	 No results returned (Boolean)	2022/01/04 16:45:15
+date:[82/14/5 TO 84/14/5]	 No results returned (Boolean)	2022/01/04 16:45:28
+5-14-82	1258 results where found	2022/01/04 16:46:16
+5/14/82	1258 results where found	2022/01/04 16:46:30
+date: [2010-10-4T00:00:00 TO 2010-10-4T23:59:59]	 No results returned (Boolean)	2022/01/04 16:46:52
+date: [1982-10-4T00:00:00 TO 1983-10-4T23:59:59]	 No results returned (Boolean)	2022/01/04 16:47:04
+date: [82-10-4T00:00:00 TO 83-10-4T23:59:59]	 No results returned (Boolean)	2022/01/04 16:47:10
+date: [82-10-4 TO 83-10-4]	 No results returned (Boolean)	2022/01/04 16:47:54
+date: [82-4-14 TO 83-10-4]	 No results returned (Boolean)	2022/01/04 16:48:06
+82-5-14	1258 results where found (Boolean)	2022/01/04 16:48:51
+82-5-14	1258 results where found	2022/01/04 16:48:56
+5+12+82	1678 results where found	2022/01/04 16:49:18
+5+12+82	1678 results where found (Boolean)	2022/01/04 16:49:28
+"5/14/82"	4 results where found (Boolean)	2022/01/04 16:49:38
+5/12	 No results returned	2022/01/04 16:51:33
+5/14	 No results returned	2022/01/04 16:51:42
+5/14	 No results returned	2022/01/04 16:52:40
+"5/14"	7 results where found (Boolean)	2022/01/04 16:53:00
+5/14	 No results returned	2022/01/04 16:53:47
+5//14	1188 results where found	2022/01/04 16:53:54
+5//14	1188 results where found (Boolean)	2022/01/04 16:54:12
+5/14	 No results returned (Boolean)	2022/01/04 16:57:43
+5/14	 No results returned (Boolean)	2022/01/04 16:57:46
+5/14	 No results returned	2022/01/04 16:59:21
+"5/14"	7 results where found	2022/01/04 16:59:28
+/home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article8.txt	6 similar documents found	2022/01/04 17:04:02

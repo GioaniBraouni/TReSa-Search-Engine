@@ -15,7 +15,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ public class TReSaResults
         pane.setStyle("-fx-background-color: white;");
         Stage primaryStage = new Stage();
         primaryStage.setTitle("TReSA Results");
-        primaryStage.initModality(Modality.APPLICATION_MODAL);
         HBox searchBox = new HBox(15);
         ImageView image = new ImageView(new Image(("file:src/TRESA.png"),150,0,true,false));
         searchBox.getChildren().add(image);
@@ -50,6 +48,11 @@ public class TReSaResults
         pane.getChildren().add(searchBox);
 
         VBox results = new VBox();
+
+        Label label = new Label("100 αναζητησεις για τo query " + text);
+        results.getChildren().add(label);
+        // MINE
+
 
         TableView elements = new TableView<>();
 
@@ -70,7 +73,7 @@ public class TReSaResults
 
         elements.getSortOrder().add(column3);
         column3.setSortable(true);
-        elements.sort();
+//        elements.sort();
 
         elements.setMinWidth(1200);
         results.getChildren().add(elements);
@@ -90,10 +93,8 @@ public class TReSaResults
 
 
 
-        primaryStage.setScene(new Scene(pane, 1268 , 720));
+        primaryStage.setScene(new Scene(pane, 1920, 1080));
         primaryStage.show();
-
-
 
         primaryStage.setOnCloseRequest(event -> {
             obs.clear();
