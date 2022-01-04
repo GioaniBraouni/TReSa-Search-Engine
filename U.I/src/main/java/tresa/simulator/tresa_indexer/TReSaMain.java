@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,7 +20,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +27,7 @@ import java.util.*;
 
 import static tresa.simulator.tresa_indexer.TReSaArticleCompareResults.articleOBS;
 import static tresa.simulator.tresa_indexer.TReSaResults.obs;
+
 
 
 /**
@@ -41,6 +40,7 @@ public class TReSaMain extends Application
     private String text = "";
     private Stage stage;
     private boolean showStatus = false;
+    private  boolean clicked = false;
 
 
 
@@ -52,7 +52,7 @@ public class TReSaMain extends Application
         //indexReuters();
 
         main.setStyle("-fx-background-color: white;");
-        var scene = new Scene(main, 1200, 720);
+        var scene = new Scene(main, 1200, 768);
 
         stage.setScene(scene);
         stage.setTitle("TReSA");
@@ -88,12 +88,38 @@ public class TReSaMain extends Application
 
         search.setOnAction(event ->
         {
+
 //            TReSaResults.start(searchBar.getText());
             try (Socket socket = new Socket("localhost",5555)){
                 PrintWriter toServer = new PrintWriter(socket.getOutputStream(),true);
                 Scanner fromClient = new Scanner(socket.getInputStream());
+                String text;
+                if (!clicked){
+                    String[] not = {"+" ,"-" ,"&&" ,"|","|" ,"!" ,"( ",")" ,"{" ,"}" ,"[" ,"]","^" ,"~" ,"*" ,"?" ,":" ,"\\"};
+                    text = searchBar.getText().toString().toLowerCase(Locale.ROOT);
+                    String[] letters = text.split(("(?!^)"));
 
-                toServer.println(searchBar.getText().toLowerCase(Locale.ROOT));
+                    StringBuilder stb = new StringBuilder();
+                    for (String s : letters){
+                        for (String l : not) {
+                            if (s.equals(l)) {
+                                stb.append("\\");
+                            }
+                        }
+                        stb.append(s);
+                    }
+                    String all = stb.toString();
+                    System.out.println(all);
+                    toServer.println(all);
+
+                }else {
+                    text = searchBar.getText().toString();
+                    toServer.println(text);
+                }
+
+
+
+//                toServer.println(text);
 
 
                 HashMap<String,HashMap<String,Float>> received = new HashMap<>();
@@ -120,9 +146,18 @@ public class TReSaMain extends Application
 
                 PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("searches.txt",true)));
                 if (received.isEmpty()){
-                    writer.println(searchBar.getText()  + "\t No results returned" + "\t" + dtf.format(now));
+                    if (clicked){
+                        writer.println(searchBar.getText()  + "\t No results returned (Boolean)" + "\t" + dtf.format(now));
+                    }else {
+                        writer.println(searchBar.getText()  + "\t No results returned" + "\t" + dtf.format(now));
+                    }
+
                 }else{
-                    writer.println(searchBar.getText() + "\t" + received.size() + " results where found" + "\t" + dtf.format(now));
+                    if (clicked) {
+                        writer.println(searchBar.getText() + "\t" + received.size() + " results where found (Boolean)" + "\t" + dtf.format(now));
+                    }else {
+                        writer.println(searchBar.getText() + "\t" + received.size() + " results where found" + "\t" + dtf.format(now));
+                    }
                 }
 
                 writer.close();
@@ -156,7 +191,7 @@ public class TReSaMain extends Application
 
 
             }catch (IOException e){
-                alertError(stage,"Server Down");
+                System.err.println("Server Down");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -180,7 +215,6 @@ public class TReSaMain extends Application
 
                 File directory = directoryChooser.showDialog(stage);
                 System.out.println(directory);
-
                 if(directory!=null)
                 {
                     String url = directory.getAbsolutePath();
@@ -201,18 +235,19 @@ public class TReSaMain extends Application
                         }
 
                     } catch (IOException | NullPointerException | ClassNotFoundException e) {
-                        alertError(stage, "Connection refused");
+                        alertError(stage,"Connection refused");
                     }
                 }
                 else
-                    alertError(stage, "Folder not found");
+                    alertError(stage,"Directory not found");
             }
         });
 
         Button addFile = new Button("Add File/Files");
         addButtons.getChildren().addAll(addFolder,addFile);
-        addFile.setPadding(new Insets(10,5,10,6));
+        addFile.setPadding(new Insets(10,18,10,18));
 
+        //done
         addFile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -234,8 +269,9 @@ public class TReSaMain extends Application
 
                             Alert alert = new Alert(Alert.AlertType.CONFIRMATION,response, ButtonType.YES);
                             alert.showAndWait();
-                            if (alert.getResult()==ButtonType.YES)
+                            if (alert.getResult()==ButtonType.YES){
                                 alert.close();
+                            }
 
                         }catch (IOException | NullPointerException e){
                             alertError(stage,"Connection refused");
@@ -245,7 +281,7 @@ public class TReSaMain extends Application
                     }
                 }
                 else
-                    alertError(stage,"File/Files not found");
+                    alertError(stage, ("File/Files not found"));
             }
         });
 
@@ -256,49 +292,48 @@ public class TReSaMain extends Application
         Button deleteFolder = new Button("Delete Folder");
         deleteFolder.setPadding(new Insets(10));
 
+        //done
         deleteFolder.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
                 File directory = directoryChooser.showDialog(stage);
                 System.out.println(directory);
+                if(directory!=null) {
+                    String url = directory.getAbsolutePath();
+                    try (Socket socket = new Socket("localhost", 5555);
+                         PrintWriter toServer = new PrintWriter(socket.getOutputStream(), true);
+                         InputStream fromClient = socket.getInputStream();
+                    ) {
 
-            if(directory!=null) {
-                String url = directory.getAbsolutePath();
-                try (Socket socket = new Socket("localhost", 5555);
-                     PrintWriter toServer = new PrintWriter(socket.getOutputStream(), true);
-                     InputStream fromClient = socket.getInputStream();
-                ) {
+                        toServer.println("@-!" + url);
 
-                    toServer.println("@-!" + url);
+                        ObjectInputStream in = new ObjectInputStream(fromClient);
+                        String response = (String) in.readObject();
 
-                    ObjectInputStream in = new ObjectInputStream(fromClient);
-                    String response = (String) in.readObject();
-
-                    if (response.contains("true")) {
-                        String output = directory.getAbsolutePath().toString() + " has been deleted from index";
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, output, ButtonType.YES);
-                        alert.showAndWait();
-                        if (alert.getResult() == ButtonType.YES) {
-                            alert.close();
-                        }
-                    } else {
-                        alertError(stage, ("Directory " + directory.getAbsolutePath() + " contains some files that do not exist in the index"));
+                        if (response.contains("true")) {
+                            String output = directory.getAbsolutePath().toString() + " has been deleted from index";
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, output, ButtonType.YES);
+                            alert.showAndWait();
+                            if (alert.getResult() == ButtonType.YES) {
+                                alert.close();
+                            }
+                        } else
+                            alertError(stage, ("Directory " + directory.getAbsolutePath() + " contains some files that do not exist in the index"));
+                    }catch (IOException | NullPointerException | ClassNotFoundException e){
+                        alertError(stage,"Connection refused");
                     }
-
-
-                } catch (IOException | NullPointerException | ClassNotFoundException e) {
-                    alertError(stage,"Connection refused");
                 }
-            }
-            else
-                alertError(stage,"Directory not found not found");
+                else
+                    alertError(stage,"Directory not found not found");
+
             }
         });
 
-        Button deleteFile = new Button("Delete File");
+        Button deleteFile = new Button("Delete File/Files");
         deleteButtons.getChildren().addAll(deleteFolder,deleteFile);
         deleteFile.setPadding(new Insets(10,18,10,18));
 
+        //done
         deleteFile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -332,6 +367,8 @@ public class TReSaMain extends Application
                         }
                     }
                 }
+                else
+                    alertError(stage, ("File/Files not found"));
 
             }
         });
@@ -433,7 +470,10 @@ public class TReSaMain extends Application
                                 hostServices.showDocument("../Server_Parsing/Reuters/"+btn.getText());
                             }
                         });
+
+
                     }
+
                 }catch (IOException e){
                     alertError(stage,"Server Down");
                 } catch (ClassNotFoundException e) {
@@ -450,6 +490,27 @@ public class TReSaMain extends Application
         add_delete.getChildren().addAll(addButtons,deleteButtons);
         add_delete.setPadding(new Insets(45,0,0,0));
         add_delete.setSpacing(10);
+
+        Button booleanButton = new Button("Boolean");
+        addButtons.getChildren().addAll(booleanButton);
+        //booleanButton.setPadding(new Insets(45,0,0,0));
+        booleanButton.setPadding(new Insets(10,18,10,18));
+
+//        final boolean[] clicked = {false};
+        booleanButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent t) {
+                if (!clicked){
+                    booleanButton.setStyle("-fx-color:blue;");
+                    clicked = true;
+                }else {
+                    booleanButton.setStyle("-fx-color:white;");
+                    clicked = false;
+                }
+
+            }
+        });
 
         add_delete.setVisible(showStatus);
 
