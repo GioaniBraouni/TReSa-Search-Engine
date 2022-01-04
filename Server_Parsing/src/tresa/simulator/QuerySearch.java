@@ -125,7 +125,7 @@ public class QuerySearch {
             System.out.println(document.get("fileName") + " " + searchResults[i].score);
             i++;
         }
-        index.close();
+
         return searchResults;
 
     }
