@@ -2,6 +2,7 @@ package tresa.simulator;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.ScoreDoc;
@@ -130,37 +131,49 @@ public class Server extends Thread {
                         }
                         //articleCompare
                         else if (this.complete.contains("*&&")){
-                            this.complete = this.complete.substring(3);
-                            String[] fileNameAndNumber = this.complete.split(" ");
-                            String userFile = fileNameAndNumber[0];
-                            int top = Integer.parseInt(fileNameAndNumber[1]);
-                            TReSaMain tester = new TReSaMain();
-                            String selectedFile = this.complete;
-                            OutputStream outputStream = client.getOutputStream();
-                            ObjectOutputStream out = new ObjectOutputStream(outputStream);
                             try {
+                                this.complete = this.complete.substring(3);
+                                String[] fileNameAndNumber = this.complete.split(" ");
+                                String userFile = fileNameAndNumber[0];
+                                int top = Integer.parseInt(fileNameAndNumber[1]);
+                                TReSaMain tester = new TReSaMain();
+                                String selectedFile = this.complete;
+                                OutputStream outputStream = client.getOutputStream();
+                                ObjectOutputStream out = new ObjectOutputStream(outputStream);
                                 HashMap<String,Float> endResults = tester.searchFileInIndex(userFile,top);
                                 out.writeObject(endResults);
-                            } catch (NoSuchAlgorithmException e) {
+                                out.close();
+                            }catch (NoSuchAlgorithmException | IOException e){
+                                OutputStream outputStream = client.getOutputStream();
+                                ObjectOutputStream out = new ObjectOutputStream(outputStream);
+                                out.writeObject(null);
+                                out.close();
                                 e.printStackTrace();
                             }
                         }
                         else {
 
                             //System.out.println(queryInput);
-                            QuerySearch docQuerySearch = new QuerySearch();
-                            ScoreDoc[] searchResults = docQuerySearch.search(this.complete);
-                            HashMap<String,HashMap<String,Float>> sendToClient = new HashMap<>();
-                            sendToClient = TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher());
+
+
 
                             StringBuilder stringBuilder = new StringBuilder();
 
                             try{
+                                QuerySearch docQuerySearch = new QuerySearch();
+                                ScoreDoc[] searchResults = docQuerySearch.search(this.complete);
+                                HashMap<String,HashMap<String,Float>> sendToClient = new HashMap<>();
+                                sendToClient = TReSaMain.printSearchResults(searchResults,this.complete, docQuerySearch.getIndexSearcher());
                                 final OutputStream out = client.getOutputStream();
                                 final ObjectOutputStream map = new ObjectOutputStream(out);
                                 map.writeObject(sendToClient);
                                 out.close();
-                            }catch (IOException e){
+                                docQuerySearch.closeReader();
+                            }catch (IOException | NullPointerException e){
+                                final OutputStream out = client.getOutputStream();
+                                final ObjectOutputStream map = new ObjectOutputStream(out);
+                                map.writeObject(null);
+                                out.close();
                                 e.printStackTrace();
                             }
 
@@ -168,7 +181,7 @@ public class Server extends Thread {
 
 
 //                            toClient.println(stringBuilder.toString());
-                            docQuerySearch.closeReader();
+
 
                         }
 

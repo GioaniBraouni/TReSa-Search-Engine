@@ -92,3 +92,28 @@ date: [82-4-14 TO 83-10-4]	 No results returned (Boolean)	2022/01/04 16:48:06
 5/14	 No results returned	2022/01/04 16:59:21
 "5/14"	7 results where found	2022/01/04 16:59:28
 /home/dimitris/IdeaProjects/Project1_Passos_Braouni/Server_Parsing/Reuters/Article8.txt	6 similar documents found	2022/01/04 17:04:02
+23	469 results where found	2022/01/05 16:27:50
+23.10	 No results returned	2022/01/05 16:28:01
+23,10	 No results returned	2022/01/05 16:28:07
+2,	1149 results where found	2022/01/05 16:28:12
+"2,"	1149 results where found	2022/01/05 16:29:29
+"2.55"	23 results where found	2022/01/05 16:30:07
+2.55	23 results where found	2022/01/05 16:30:13
+19, 1984	764 results where found	2022/01/05 16:30:33
+"19, 1984"	4 results where found	2022/01/05 16:30:39
+19, 1984	764 results where found	2022/01/05 16:31:28
+X-1986	3442 results where found	2022/01/05 16:31:53
+"X-1986"	5 results where found	2022/01/05 16:32:00
+X-1984	374 results where found	2022/01/05 16:32:42
+"X-1984"	 No results returned	2022/01/05 16:32:50
+"x-1984"	 No results returned	2022/01/05 16:32:54
+"x-1984"	 No results returned	2022/01/05 16:33:07
+"X-1984"	 No results returned	2022/01/05 16:33:12
+X-1984	374 results where found	2022/01/05 16:33:17
+"X-1984"	 No results returned	2022/01/05 16:33:25
+"x-1984"	 No results returned	2022/01/05 16:35:00
+"X-1984"	 No results returned	2022/01/05 16:35:07
+"X-1984"	 No results returned	2022/01/05 16:35:32
+"X-1984"	 No results returned	2022/01/05 16:36:29
+"X-1986"	5 results where found	2022/01/05 16:36:47
+"X-1986"	5 results where found	2022/01/05 16:37:11
