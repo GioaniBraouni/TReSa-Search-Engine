@@ -117,3 +117,21 @@ X-1984	374 results where found	2022/01/05 16:33:17
 "X-1984"	 No results returned	2022/01/05 16:36:29
 "X-1986"	5 results where found	2022/01/05 16:36:47
 "X-1986"	5 results where found	2022/01/05 16:37:11
+john	 No results returned	2022/01/06 14:26:51
+C:\Users\giann\Desktop\Reuters_articles\Article9997.txt	1 similar documents found	2022/01/06 14:31:38
+john	322 results where found	2022/01/06 15:08:46
+john	50 results where found	2022/01/06 15:39:38
+john	50 results where found	2022/01/06 15:40:59
+john	50 results where found	2022/01/06 15:41:38
+john	50 results where found	2022/01/06 15:42:56
+john	50 results where found	2022/01/06 15:43:28
+john	50 results where found	2022/01/06 15:44:38
+john	50 results where found	2022/01/06 15:45:23
+john	50 results where found	2022/01/06 15:46:06
+john	50 results where found	2022/01/06 15:50:58
+john	50 results where found	2022/01/06 15:51:32
+john	50 results where found	2022/01/06 15:58:27
+john	50 results where found	2022/01/06 16:00:13
+john	50 results where found	2022/01/06 16:07:27
+john	50 results where found	2022/01/06 16:07:53
+john	50 results where found	2022/01/06 16:09:20

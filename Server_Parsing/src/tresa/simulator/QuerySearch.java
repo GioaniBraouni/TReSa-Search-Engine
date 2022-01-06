@@ -36,7 +36,7 @@ public class QuerySearch {
     IndexReader indexReader;
     Analyzer analyzer;
     TReSaIndex index;
-
+    public static int kMostHits=50;
 
 
     public QuerySearch() throws IOException
@@ -56,7 +56,7 @@ public class QuerySearch {
     {
         try {
 
-            TopScoreDocCollector docCollector = TopScoreDocCollector.create(10000, 20000);
+            TopScoreDocCollector docCollector = TopScoreDocCollector.create(kMostHits, 20000);
             ScoreDoc[] searchResults = null;
             Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
             analyzerMap.put(TReSaFields.PEOPLE, new StandardAnalyzer());

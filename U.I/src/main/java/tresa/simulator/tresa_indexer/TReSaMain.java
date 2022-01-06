@@ -25,9 +25,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static tresa.simulator.tresa_indexer.TReSaArticleCompareResults.articleOBS;
-
-
 /**
  * JavaFX App
  */
@@ -400,8 +397,9 @@ public class TReSaMain extends Application
             }
         });
 
+        Button kHits = new Button("K-Hits");
         Button articleCompare = new Button("Compare Article");
-        deleteButtons.getChildren().addAll(articleCompare);
+        deleteButtons.getChildren().addAll(articleCompare,kHits);
         articleCompare.setPadding(new Insets(10,18,10,18));
 
         articleCompare.setOnAction(new EventHandler<ActionEvent>() {
@@ -444,7 +442,7 @@ public class TReSaMain extends Application
                     for (HashMap.Entry<String,Float> entry : results.entrySet()){
                         Button btn = new Button(entry.getKey());
                         buttonList.add(btn);
-                        articleOBS.add(new Articles(btn,entry.getValue()));
+                        TReSaArticleCompareResults.articleOBS.add(new Articles(btn,entry.getValue()));
                     }
 
 
@@ -505,11 +503,41 @@ public class TReSaMain extends Application
         add_delete.setSpacing(10);
 
         Button booleanButton = new Button("Boolean");
+
         addButtons.getChildren().addAll(booleanButton);
+
         //booleanButton.setPadding(new Insets(45,0,0,0));
         booleanButton.setPadding(new Insets(10,18,10,18));
+        kHits.setPadding(new Insets(10,18,10,18));
 
-//        final boolean[] clicked = {false};
+        kHits.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                TextInputDialog textInputDialog = new TextInputDialog("0");
+                textInputDialog.setTitle("Set k most hits");
+                textInputDialog.setContentText("Please enter a number");
+                int top = 0;
+                Optional<String> userInput = textInputDialog.showAndWait();
+                if (userInput.isPresent()) {
+                    top = Integer.parseInt(textInputDialog.getEditor().getText());
+                    textInputDialog.close();
+
+                } else {
+                    textInputDialog.close();
+                }
+
+                try (Socket socket = new Socket("localhost",5555)) {
+                    PrintWriter toServer = new PrintWriter(socket.getOutputStream(), true);
+                    Scanner fromClient = new Scanner(socket.getInputStream());
+
+                    toServer.println("&&&" + " " + top);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
         booleanButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
             @Override

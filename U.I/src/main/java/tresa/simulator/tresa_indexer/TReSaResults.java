@@ -49,11 +49,6 @@ public class TReSaResults
 
         VBox results = new VBox();
 
-        Label label = new Label("100 αναζητησεις για τo query " + text);
-        results.getChildren().add(label);
-        // MINE
-
-
         TableView elements = new TableView<>();
 
         TableColumn<Articles,String> column1 = new TableColumn<>("File Name");

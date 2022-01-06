@@ -151,6 +151,19 @@ public class Server extends Thread {
                                 e.printStackTrace();
                             }
                         }
+                        //k Hits
+                        else if (this.complete.contains("&&&")){
+
+                                this.complete = this.complete.substring(2);
+                                String[] fileNameAndNumber = this.complete.split(" ");
+                                int top = Integer.parseInt(fileNameAndNumber[1]);
+                                if(top!=0)
+                                    QuerySearch.kMostHits=top;
+                                else
+                                    QuerySearch.kMostHits=50;
+                                System.out.println("K most hits from gui "+ top);
+                                System.out.println("K most hits right now "+ QuerySearch.kMostHits);
+                        }
                         else {
 
                             //System.out.println(queryInput);

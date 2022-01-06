@@ -10,37 +10,12 @@
     <orderEntry type="library" name="lucene-core-8.0.0" level="application" />
     <orderEntry type="library" name="lucene-queryparser-8.0.0" level="application" />
     <orderEntry type="library" name="lucene-analyzers-common-8.0.0" level="application" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/lucene-8.0.0/highlighter/lucene-highlighter-8.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/lucene-8.0.0/queryparser/lucene-queryparser-8.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="highlighter" level="application" />
+    <orderEntry type="library" name="lucene-memory-8.0.0" level="application" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://C:/lucene-8.0.0/queries/lucene-queries-8.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://C:/lucene-8.0.0/memory/lucene-memory-8.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

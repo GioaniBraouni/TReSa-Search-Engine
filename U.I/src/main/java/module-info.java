@@ -5,6 +5,7 @@ module tresa.simulator.tresa_indexer {
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires org.kordamp.bootstrapfx.core;
+    requires javafx.base;
 
 
     opens tresa.simulator.tresa_indexer to javafx.fxml;
