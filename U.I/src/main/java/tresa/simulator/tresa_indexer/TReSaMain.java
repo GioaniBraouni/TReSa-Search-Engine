@@ -26,8 +26,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static tresa.simulator.tresa_indexer.TReSaArticleCompareResults.articleOBS;
-import static tresa.simulator.tresa_indexer.TReSaResults.obs;
-
 
 
 /**
@@ -154,7 +152,7 @@ public class TReSaMain extends Application
                         Float score = next.getValue();
                         Button btn = new Button(filename);
                         buttonList.add(btn);
-                        obs.add(new Articles(btn,output,score));
+                        TReSaResults.obs.add(new Articles(btn,output,score));
 
                     }
                 }
@@ -339,7 +337,7 @@ public class TReSaMain extends Application
                     }
                 }
                 else
-                    alertError(stage,"Directory not found not found");
+                    alertError(stage,"Directory not found");
 
             }
         });
@@ -548,17 +546,6 @@ public class TReSaMain extends Application
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setContentText(errorString);
-        alert.setHeaderText(null);
-        alert.initOwner(stage);
-        alert.initModality(Modality.WINDOW_MODAL);
-        alert.show();
-    }
-
-    private void alertInfo(Stage stage, String infoString)
-    {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Info");
-        alert.setContentText(infoString);
         alert.setHeaderText(null);
         alert.initOwner(stage);
         alert.initModality(Modality.WINDOW_MODAL);

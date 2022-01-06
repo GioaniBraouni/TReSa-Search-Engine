@@ -18,11 +18,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import static javafx.collections.FXCollections.observableArrayList;
+
 public class TReSaArticleCompareResults {
 
     private static TextField searchBar = new TextField();
 
-    public static ObservableList<Articles> articleOBS = FXCollections.observableArrayList();
+    public static ObservableList<Articles> articleOBS = observableArrayList();
 
     public static void start(String text)
     {
@@ -45,11 +47,6 @@ public class TReSaArticleCompareResults {
         pane.getChildren().add(searchBox);
 
         VBox results = new VBox();
-
-        Label label = new Label("100 αναζητησεις για τo query " + text);
-        results.getChildren().add(label);
-        // MINE
-
 
         TableView articleElements = new TableView<>();
 
@@ -88,7 +85,7 @@ public class TReSaArticleCompareResults {
 
 
 
-        primaryStage.setScene(new Scene(pane, 1920, 1080));
+        primaryStage.setScene(new Scene(pane, 1200, 768));
         primaryStage.show();
 
 

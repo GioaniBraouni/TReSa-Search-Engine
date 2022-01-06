@@ -93,7 +93,7 @@ public class TReSaResults
 
 
 
-        primaryStage.setScene(new Scene(pane, 1920, 1080));
+        primaryStage.setScene(new Scene(pane, 1200, 768));
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(event -> {
