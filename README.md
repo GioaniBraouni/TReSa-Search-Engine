@@ -11,13 +11,13 @@
 
 *There is a similarity score for every article that has been found with the query that has been typed from the client.The more relative is the article ,the higher it will be in the search result.
 
-*The default number of the articles that has been successfully found is 50.For more results, press the button options and then the button k - means.
+*The default number of the articles that has been successfully found is 50.For more results, press the button options and then the button k - most hits.
 
 *Features like search history and article comparison are added in order to extend the usability of the search engine and make it more interesting.
 
 # Final Notes
 
-*This project demonstrates all the skills and knowledge I have obtained combined with clean code principles(Thanks R.Martin),during all the years of my graduation at the university of Peloponnese.
+*This project demonstrates all the skills and knowledge I have obtained combined with clean code principles(Thanks Uncle Bob),during all the years of my graduation at the university of Peloponnese.
 
 **Prerequisites**
 
